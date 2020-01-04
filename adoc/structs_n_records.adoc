@@ -20,9 +20,58 @@ record Foo, name : String, id : Int32 do
 end
 ```
 
+## Records
 
-@stnluu_twitter & @randiaz95 - I have two versions of using channels and fibers at: https://github.com/btihen/crystal_channels - It works pretty well. I next want to figure out how to create multiple TCP or windows (one for each user). I realized when doing the chat room - using one thread works well - but compiliing with multiple cores - outputting to one screen gets jumbled again. I'll happily learn more about multiple connections (I assume I need to use TCP sockets) - could I also use OS sockets?
+Records are a simplified way to create a Struct _(they have default initializer)._
 
-who is doing the output to screen?
-remember yesterday, we discussed about ideally, there's a "room" object that keeps track of all the users, and does the job of broadcasting the message–instead of each user keeping track of all the other users?
-ideally, this "room" object should be the one doing the output to screen, aka only one fiber doing the output.
+**Record Definitions**
+```
+record Foo, id : Int32, name : String
+# or
+record(Foo, id : Int32, name : String)
+```
+
+Like structs, records can also have custom behaviors - defined with:
+```
+record(Foo, name : String, id : Int32) do
+  def to_s
+    puts "Foo: id: #{id}; name: #{name}"
+  end
+end
+```
+
+Records can be a flexible data structure (tuples and others require a fixed data structure - without `nil`s).
+
+For example if you need a simple data structure that may or maynot have all the data you can define a record with the following parameters `name : String? = nil`
+```
+record Foo, id : Int32, name : String? = nil do
+  def to_s
+    puts "Foo: id: #{id}; name: #{name}"
+  end
+end
+```
+
+**Record Usage:**
+Record assignment is done using:
+```
+foo1 = Foo.new(1)
+# => Foo(id: 1, name: nil)
+foo2 = Foo.new(2, "Bar")
+# => Foo(id: 2, name: "Bar")
+```
+
+Record usage looks like:
+```
+puts "id: #{foo1.id}"
+# => id: 1
+puts "name: #{foo1.name}"
+# => name:
+puts foo1.to_s
+# => Foo: id: 1; name:
+puts "id: #{foo2.id}"
+# => id: 2
+puts "name: #{foo2.name}"
+# => name: Bar
+puts foo2.to_s
+# => Foo: id: 2; name: Bar
+```

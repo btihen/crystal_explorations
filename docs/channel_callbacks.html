@@ -447,7 +447,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toc" class="toc">
 <div id="toctitle">Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_call_back_channels_when_closed">1. Call-Back Channels (when closed)</a></li>
+<li><a href="#_call_back_channels">1. Call-Back Channels</a></li>
 </ul>
 </div>
 </div>
@@ -476,8 +476,14 @@ The code is just good enough to demonstrate what is happening.
 </div>
 </div>
 <div class="sect1">
-<h2 id="_call_back_channels_when_closed">1. Call-Back Channels (when closed)</h2>
+<h2 id="_call_back_channels">1. Call-Back Channels</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>When we no longer need to communicate with a <code>User</code> we are keeping the channel open - which won&#8217;t allow the garbage collector to remove unused instances.</p>
+</div>
+<div class="paragraph">
+<p>Ideally, we will close the channels when we are done and we can even use that info to know if we can end our <strong>main thread</strong> (program).</p>
+</div>
 <div class="paragraph">
 <p><strong><a href="index.html">Start Page</a></strong></p>
 </div>
@@ -486,8 +492,10 @@ The code is just good enough to demonstrate what is happening.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-04 21:23:44 +0100
+Last updated 2020-01-04 22:25:42 +0100
 </div>
 </div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/run_prettify.min.js"></script>
 </body>
 </html>

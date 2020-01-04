@@ -498,7 +498,7 @@ The code is just good enough to demonstrate what is happening.
 <div class="listingblock">
 <div class="title">src/simple_channels/user.cr</div>
 <div class="content">
-<pre class="highlight"><code class="language-crystal" data-lang="crystal">class User
+<pre class="prettyprint highlight"><code data-lang="crystal">class User
   getter channel : Channel(String)
   private getter name : String, email : String
 
@@ -532,7 +532,7 @@ end</code></pre>
 <div class="listingblock">
 <div class="title">src/simple_channels/main.cr</div>
 <div class="content">
-<pre class="highlight"><code class="language-crystal" data-lang="crystal">require "./user"
+<pre class="prettyprint highlight"><code data-lang="crystal">require "./user"
 
 # USAGE
 module Main
@@ -564,17 +564,12 @@ module Main
 end</code></pre>
 </div>
 </div>
-<div class="sidebarblock">
-<div class="content">
-<div class="title">Run with:</div>
 <div class="paragraph">
-<p>Run this code with:</p>
+<p>Run with:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-crystal" data-lang="crystal">crystal src/simple_channels/main.cr</code></pre>
-</div>
-</div>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/simple_channels/main.cr</code></pre>
 </div>
 </div>
 </div>
@@ -589,7 +584,7 @@ end</code></pre>
 <div class="listingblock">
 <div class="title">src/simple_channels/main_close.cr</div>
 <div class="content">
-<pre class="highlight"><code class="language-crystal" data-lang="crystal">require "./user"
+<pre class="prettyprint highlight"><code data-lang="crystal">require "./user"
 
 # USAGE
 module MainClose
@@ -628,17 +623,12 @@ module MainClose
 end</code></pre>
 </div>
 </div>
-<div class="sidebarblock">
-<div class="content">
-<div class="title">Run with:</div>
 <div class="paragraph">
-<p>Run this code with:</p>
+<p>Run with:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-crystal" data-lang="crystal">crystal src/simple_channels/main_close.cr</code></pre>
-</div>
-</div>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/simple_channels/main_close.cr</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -656,7 +646,7 @@ end</code></pre>
 <div class="listingblock">
 <div class="title">src/simple_channels/main_stress.cr</div>
 <div class="content">
-<pre class="highlight"><code class="language-crystal" data-lang="crystal">require "./user"
+<pre class="prettyprint highlight"><code data-lang="crystal">require "./user"
 
 module MainStress
 
@@ -696,17 +686,12 @@ module MainStress
 end</code></pre>
 </div>
 </div>
-<div class="sidebarblock">
-<div class="content">
-<div class="title">Run with:</div>
 <div class="paragraph">
-<p>Run this code with:</p>
+<p>Run with:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-crystal" data-lang="crystal">crystal src/simple_channels/main_stress.cr</code></pre>
-</div>
-</div>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/simple_channels/main_stress.cr</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -717,7 +702,7 @@ end</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-crystal" data-lang="crystal"># close user channels
+<pre class="prettyprint highlight"><code data-lang="crystal"># close user channels
 users.each do |receiver|
   # synchronous channel closing
   # receiver.channel.close
@@ -732,7 +717,7 @@ end</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-crystal" data-lang="crystal"># send lots of messages
+<pre class="prettyprint highlight"><code data-lang="crystal"># send lots of messages
 users.each do |receiver|
   # async messaging
   # spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
@@ -747,7 +732,7 @@ end</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-crystal" data-lang="crystal"># wait for all channels to close before allowing main to terminate
+<pre class="prettyprint highlight"><code data-lang="crystal"># wait for all channels to close before allowing main to terminate
 # Fiber.yield
 
 loop do
@@ -764,7 +749,7 @@ end</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-crystal" data-lang="crystal"># send lots of messages
+<pre class="prettyprint highlight"><code data-lang="crystal"># send lots of messages
 users.each do |receiver|
   # async messaging
   spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
@@ -774,46 +759,12 @@ users.each do |receiver|
 end</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>In this case: I suggest the following code to use <code>user</code>:
-.src/simple_channels/main_stress.cr</p>
-</div>
-<div class="listingblock">
+<div class="sidebarblock">
 <div class="content">
-<pre class="highlight"><code class="language-crystal" data-lang="crystal">require "./user"
-
-module MainStress
-
-  # make a large number of users
-  users  = [] of User
-  status = Channel(Nil).new
-  1000.times do |i|
-    user = User.new(name: "user_#{i}",  email: "user_#{i}@example.ch")
-    users &lt;&lt; user
-  end
-
-  # send lots of messages
-  users.each do |receiver|
-    # async messaging
-    spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
-
-    # synchronous messaging
-    # receiver.channel.send("SYNC -- From: #{receiver.to_s} - with channel")
-  end
-
-  # close user channels
-  users.each do |receiver|
-    # close asynchronously to allow messages to be delivered
-    spawn receiver.channel.close
-  end
-
-
-  # wait for all channels to close before allowing main to terminate
-  loop do
-    break if users.all?{ |u| u.channel.closed? } # are all channels are closed?
-    Fiber.yield
-  end
-end</code></pre>
+<div class="title">TODO:</div>
+<div class="paragraph">
+<p>Explain and find a solution for using both async and synchronous messaging.</p>
+</div>
 </div>
 </div>
 <div class="paragraph">
@@ -825,8 +776,10 @@ end</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-04 21:23:31 +0100
+Last updated 2020-01-04 22:24:58 +0100
 </div>
 </div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/run_prettify.min.js"></script>
 </body>
 </html>

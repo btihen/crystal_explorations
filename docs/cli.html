@@ -487,7 +487,7 @@ The code is just good enough to demonstrate what is happening.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ crystal -h</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal -h</code></pre>
 </div>
 </div>
 <div class="ulist">
@@ -499,7 +499,7 @@ The code is just good enough to demonstrate what is happening.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ crystal init app project_name
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal init app project_name
 $ cd project_name</code></pre>
 </div>
 </div>
@@ -512,7 +512,7 @@ $ cd project_name</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ crystal run src/code.cr</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal run src/code.cr</code></pre>
 </div>
 </div>
 <div class="ulist">
@@ -524,7 +524,7 @@ $ cd project_name</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ crystal build src/file.cr
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal build src/file.cr
 $ ./file</code></pre>
 </div>
 </div>
@@ -537,7 +537,7 @@ $ ./file</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ crystal build --release src/file.cr -o new_name
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal build --release src/file.cr -o new_name
 $ ./new_name</code></pre>
 </div>
 </div>
@@ -550,7 +550,7 @@ $ ./new_name</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">crystal build -Dpreview_mt code.cr -o code
+<pre class="prettyprint highlight"><code data-lang="bash">crystal build -Dpreview_mt code.cr -o code
 $ ./code                   # defaul is 4 workers
 $ CRYSTAL_WORKERS=2 ./code # uses two CPUS
 $ CRYSTAL_WORKERS=4 ./code # same as default</code></pre>
@@ -565,7 +565,7 @@ $ CRYSTAL_WORKERS=4 ./code # same as default</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ crystal spec</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal spec</code></pre>
 </div>
 </div>
 <div class="ulist">
@@ -577,7 +577,7 @@ $ CRYSTAL_WORKERS=4 ./code # same as default</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ crystal docs</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal docs</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -588,8 +588,10 @@ $ CRYSTAL_WORKERS=4 ./code # same as default</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-04 21:23:55 +0100
+Last updated 2020-01-04 22:25:58 +0100
 </div>
 </div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/run_prettify.min.js"></script>
 </body>
 </html>

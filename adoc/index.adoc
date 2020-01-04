@@ -1,10 +1,10 @@
 = Crystal Lang Explorations
+:source-highlighter: prettify
+:source-language: crystal
 Bill Tihen (Crystal 0.32.1)
 Version 0.0.1
 
 :description: Exploring Crystal's Features
-:source-highlighter: rouge
-:source-language: crystal
 :keywords: Crystal Language
 :imagesdir: ./images
 

@@ -1,8 +1,8 @@
 # src/concurrency/spawn_block.cr
-puts "before spawn"
+puts "before spawn"   # synchronous
 spawn do
-  puts "within spawn"
+  puts "within spawn" # asynchronous
 end
-puts "after spawn"
+puts "after spawn"    # synchronous
 
 Fiber.yield

@@ -1,4 +1,6 @@
 = Crystal Lang Parallelism
+:source-highlighter: prettify
+:source-language: crystal
 Bill Tihen (Crystal 0.32.1)
 Version 0.0.1
 :sectnums:
@@ -7,8 +9,6 @@ Version 0.0.1
 :toc-title: Contents
 
 :description: Exploring Crystal's Features
-:source-highlighter: rouge
-:source-language: crystal
 :keywords: Crystal Language
 :imagesdir: ./images
 

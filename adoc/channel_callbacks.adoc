@@ -1,4 +1,6 @@
 = Crystal Lang Channel Callbacks
+:source-highlighter: prettify
+:source-language: crystal
 Bill Tihen (Crystal 0.32.1)
 Version 0.0.1
 :sectnums:
@@ -7,8 +9,6 @@ Version 0.0.1
 :toc-title: Contents
 
 :description: Exploring Crystal's Features
-:source-highlighter: rouge
-:source-language: crystal
 :keywords: Crystal Language
 :imagesdir: ./images
 
@@ -20,7 +20,13 @@ Exploring & Learning Crystal Language with code examples and augment the documen
 NOTE: This code does not focus on best practices, security or production ready code. +
 The code is just good enough to demonstrate what is happening.
 
-== Call-Back Channels (when closed)
+== Call-Back Channels
+
+When we no longer need to communicate with a `User` we are keeping the channel open - which won't allow the garbage collector to remove unused instances.
+
+Ideally, we will close the channels when we are done and we can even use that info to know if we can end our *main thread* (program).
+
+
 
 
 *link:index.html[Start Page]*

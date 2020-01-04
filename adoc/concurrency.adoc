@@ -1,4 +1,6 @@
 = Crystal Lang Concurrency
+:source-highlighter: prettify
+:source-language: crystal
 Bill Tihen (Crystal 0.32.1)
 Version 0.0.1
 :sectnums:
@@ -7,8 +9,6 @@ Version 0.0.1
 :toc-title: Contents
 
 :description: Exploring Crystal's Features
-:source-highlighter: coderay
-:source-language: ruby
 :keywords: Crystal Language
 :imagesdir: ./images
 
@@ -52,8 +52,8 @@ puts "after spawn"
 ----
 
 Run with:
-```
-crystal src/concurrency/spawn_block.cr
+```bash
+$ crystal src/concurrency/spawn_block.cr
 ```
 
 NOTE: We don't see the text *within spawn*
@@ -66,22 +66,23 @@ Spawn block - uses the value given at the time when the Fiber is executed - whic
 [source]
 ----
 i = 0
+puts "SYNC: i = 0 = #{i}"     # synchronous
 spawn do
-  puts i
+  puts "ASYNC: i = 0 = #{i}"  # asynchronous
 end
 
 i = 1
+puts "SYNC: i = 1 = #{i}"     # synchronous
 spawn do
-  puts i
+  puts "ASYNC: i = 1 = #{i}"  # asynchronous
 end
 
-# i = 1 when the main thread yields to the fibers!
-Fiber.yield
+Fiber.yield  # i = 1 when the main thread yields to the fibers!
 ----
 
 Run with:
-```
-crystal src/concurrency/spawn_block_unexpected.cr
+```bash
+$ crystal src/concurrency/spawn_block_unexpected.cr
 ```
 
 Because i = 1 at the time when the fibers execute '1' is printed twice - this is probably not desired in this case.  The solution is to use `Proc`
@@ -90,31 +91,33 @@ The solution is to define a proc which will pass the value at the time the `Proc
 
 This code works as expected, but is clumsy looking:
 
-.src/concurrency/spawn_proc_block.cr
+.src/concurrency/spawn_proc.cr
 [source]
 ----
 i = 0
-puts_0 = ->(x : Int32) do
+puts "SYNC: i = 0 = #{i}"       # synchronous
+proc_0 = ->(x : Int32) do
   spawn do
-    puts(x)
+    puts "ASYNC: i = 0 = #{x}"  # asynchronous
   end
 end
-puts_0.call(i)
+proc_0.call(i)
 
 i = 1
-puts_1 = ->(x : Int32) do
+puts "SYNC: i = 1 = #{i}"       # synchronous
+proc_1 = ->(x : Int32) do
   spawn do
-    puts(x)
+    puts "ASYNC: i = 1 = #{x}"  # asynchronous
   end
 end
-puts_1.call(i)
+proc_1.call(i)
 
 Fiber.yield
 ----
 
 Run with:
-```
-crystal src/concurrency/spawn_proc_block.cr
+```bash
+$ crystal src/concurrency/spawn_proc_block.cr
 ```
 
 NOTE: now all works well - but lots of code for 2 simple `puts` statements.
@@ -127,17 +130,19 @@ A *much nicer* way to pass the value at the time of call -- not at the time of e
 [source]
 ----
 i = 0
-puts i
+puts "SYNC: i = 0 = #{i}"         # synchronous
+spawn puts "ASYNC: i = 0 = #{i}"  # asynchronous
 
 i = 1
-puts i
+puts "SYNC: i = 1 = #{i}"         # synchronous
+spawn puts "ASYNC: i = 1 = #{i}"  # asynchronous
 
 Fiber.yield
 ----
 
 Run with:
-```
-crystal src/concurrency/spawn_call.cr
+```bash
+$ crystal src/concurrency/spawn_call.cr
 ```
 
 This is syntactic sugar (a crystal `macro`) for `proc`-`spawn` technique shown above.  I find this syntax far more attractive and will be used for method calls from now on!
@@ -169,7 +174,7 @@ class User
 end
 ----
 
-To use with concurrency:
+Code to send `user` messages:
 
 .src/concurrency/user_messaging.cr
 [source]
@@ -207,8 +212,8 @@ end
 ----
 
 Run with:
-```
-crystal src/concurrency/spawn_call.cr
+```bash
+$ crystal src/concurrency/spawn_call.cr
 ```
 
 Just a reminder, notice how all async messages happen after `Fiber.yield`

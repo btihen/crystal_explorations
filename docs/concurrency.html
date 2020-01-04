@@ -513,7 +513,7 @@ The code is just good enough to demonstrate what is happening.
 <div class="listingblock">
 <div class="title">src/concurrency/spawn_block.cr</div>
 <div class="content">
-<pre class="highlight"><code class="language-ruby" data-lang="ruby">puts "before spawn"
+<pre class="prettyprint highlight"><code data-lang="crystal">puts "before spawn"
 spawn do
   puts "within spawn"
 end
@@ -527,7 +527,7 @@ puts "after spawn"
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-ruby" data-lang="ruby">crystal src/concurrency/spawn_block.cr</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/concurrency/spawn_block.cr</code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -551,18 +551,19 @@ We don&#8217;t see the text <strong>within spawn</strong>
 <div class="listingblock">
 <div class="title">src/concurrency/spawn_block_unexpected.cr</div>
 <div class="content">
-<pre class="highlight"><code class="language-ruby" data-lang="ruby">i = 0
+<pre class="prettyprint highlight"><code data-lang="crystal">i = 0
+puts "SYNC: i = 0 = #{i}"     # synchronous
 spawn do
-  puts i
+  puts "ASYNC: i = 0 = #{i}"  # asynchronous
 end
 
 i = 1
+puts "SYNC: i = 1 = #{i}"     # synchronous
 spawn do
-  puts i
+  puts "ASYNC: i = 1 = #{i}"  # asynchronous
 end
 
-# i = 1 when the main thread yields to the fibers!
-Fiber.yield</code></pre>
+Fiber.yield  # i = 1 when the main thread yields to the fibers!</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -570,7 +571,7 @@ Fiber.yield</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-ruby" data-lang="ruby">crystal src/concurrency/spawn_block_unexpected.cr</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/concurrency/spawn_block_unexpected.cr</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -583,23 +584,25 @@ Fiber.yield</code></pre>
 <p>This code works as expected, but is clumsy looking:</p>
 </div>
 <div class="listingblock">
-<div class="title">src/concurrency/spawn_proc_block.cr</div>
+<div class="title">src/concurrency/spawn_proc.cr</div>
 <div class="content">
-<pre class="highlight"><code class="language-ruby" data-lang="ruby">i = 0
-puts_0 = -&gt;(x : Int32) do
+<pre class="prettyprint highlight"><code data-lang="crystal">i = 0
+puts "SYNC: i = 0 = #{i}"       # synchronous
+proc_0 = -&gt;(x : Int32) do
   spawn do
-    puts(x)
+    puts "ASYNC: i = 0 = #{x}"  # asynchronous
   end
 end
-puts_0.call(i)
+proc_0.call(i)
 
 i = 1
-puts_1 = -&gt;(x : Int32) do
+puts "SYNC: i = 1 = #{i}"       # synchronous
+proc_1 = -&gt;(x : Int32) do
   spawn do
-    puts(x)
+    puts "ASYNC: i = 1 = #{x}"  # asynchronous
   end
 end
-puts_1.call(i)
+proc_1.call(i)
 
 Fiber.yield</code></pre>
 </div>
@@ -609,7 +612,7 @@ Fiber.yield</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-ruby" data-lang="ruby">crystal src/concurrency/spawn_proc_block.cr</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/concurrency/spawn_proc_block.cr</code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -633,11 +636,13 @@ now all works well - but lots of code for 2 simple <code>puts</code> statements.
 <div class="listingblock">
 <div class="title">src/concurrency/spawn_call.cr</div>
 <div class="content">
-<pre class="highlight"><code class="language-ruby" data-lang="ruby">i = 0
-puts i
+<pre class="prettyprint highlight"><code data-lang="crystal">i = 0
+puts "SYNC: i = 0 = #{i}"         # synchronous
+spawn puts "ASYNC: i = 0 = #{i}"  # asynchronous
 
 i = 1
-puts i
+puts "SYNC: i = 1 = #{i}"         # synchronous
+spawn puts "ASYNC: i = 1 = #{i}"  # asynchronous
 
 Fiber.yield</code></pre>
 </div>
@@ -647,7 +652,7 @@ Fiber.yield</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-ruby" data-lang="ruby">crystal src/concurrency/spawn_call.cr</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/concurrency/spawn_call.cr</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -665,7 +670,7 @@ Fiber.yield</code></pre>
 <div class="listingblock">
 <div class="title">src/concurrency/user.cr</div>
 <div class="content">
-<pre class="highlight"><code class="language-ruby" data-lang="ruby">class User
+<pre class="prettyprint highlight"><code data-lang="crystal">class User
   getter channel : Channel(String)
   private getter name : String, email : String
 
@@ -684,12 +689,12 @@ end</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>To use with concurrency:</p>
+<p>Code to send <code>user</code> messages:</p>
 </div>
 <div class="listingblock">
 <div class="title">src/concurrency/user_messaging.cr</div>
 <div class="content">
-<pre class="highlight"><code class="language-ruby" data-lang="ruby">require "./user"     # autoloads the above user.cr file
+<pre class="prettyprint highlight"><code data-lang="crystal">require "./user"     # autoloads the above user.cr file
 
 # USAGE
 module UserMessaging
@@ -726,7 +731,7 @@ end</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-ruby" data-lang="ruby">crystal src/concurrency/spawn_call.cr</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/concurrency/spawn_call.cr</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -741,8 +746,10 @@ end</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-04 21:24:00 +0100
+Last updated 2020-01-04 22:45:21 +0100
 </div>
 </div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/run_prettify.min.js"></script>
 </body>
 </html>

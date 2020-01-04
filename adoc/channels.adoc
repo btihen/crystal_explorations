@@ -1,4 +1,6 @@
 = Crystal Lang Channels
+:source-highlighter: prettify
+:source-language: crystal
 Bill Tihen (Crystal 0.32.1)
 Version 0.0.1
 :sectnums:
@@ -7,11 +9,8 @@ Version 0.0.1
 :toc-title: Contents
 
 :description: Exploring Crystal's Features
-:source-highlighter: rouge
-:source-language: crystal
 :keywords: Crystal Language
 :imagesdir: ./images
-
 
 *link:index.html[Start Page]*
 
@@ -32,7 +31,7 @@ In the following code the `User` creates a fiber that listens to new messages on
 
 
 .src/simple_channels/user.cr
-[source,crystal]
+[source]
 ----
 class User
   getter channel : Channel(String)
@@ -99,13 +98,10 @@ module Main
 end
 ----
 
-.Run with:
-****
-Run this code with:
+Run with:
+```bash
+$ crystal src/simple_channels/main.cr
 ```
-crystal src/simple_channels/main.cr
-```
-****
 
 === Closing Channels
 
@@ -155,13 +151,10 @@ module MainClose
 end
 ----
 
-.Run with:
-****
-Run this code with:
+Run with:
+```bash
+$ crystal src/simple_channels/main_close.cr
 ```
-crystal src/simple_channels/main_close.cr
-```
-****
 
 Running this with immediate channel closing creates errors since closing the channel immediately means that messages in queued Fibers - waiting to deliver will suddenly loose their delivery channel.
 
@@ -214,13 +207,10 @@ module MainStress
 end
 ----
 
-.Run with:
-****
-Run this code with:
+Run with:
+```bash
+$ crystal src/simple_channels/main_stress.cr
 ```
-crystal src/simple_channels/main_stress.cr
-```
-****
 
 With the simple `Fiber.yield` we get a lot of exceptions since the channels then we wait for the async messages to be delivered.
 
@@ -273,45 +263,9 @@ users.each do |receiver|
 end
 ```
 
-In this case: I suggest the following code to use `user`:
-.src/simple_channels/main_stress.cr
-[source]
-----
-require "./user"
-
-module MainStress
-
-  # make a large number of users
-  users  = [] of User
-  status = Channel(Nil).new
-  1000.times do |i|
-    user = User.new(name: "user_#{i}",  email: "user_#{i}@example.ch")
-    users << user
-  end
-
-  # send lots of messages
-  users.each do |receiver|
-    # async messaging
-    spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
-
-    # synchronous messaging
-    # receiver.channel.send("SYNC -- From: #{receiver.to_s} - with channel")
-  end
-
-  # close user channels
-  users.each do |receiver|
-    # close asynchronously to allow messages to be delivered
-    spawn receiver.channel.close
-  end
-
-
-  # wait for all channels to close before allowing main to terminate
-  loop do
-    break if users.all?{ |u| u.channel.closed? } # are all channels are closed?
-    Fiber.yield
-  end
-end
-----
-
+.TODO:
+****
+Explain and find a solution for using both async and synchronous messaging.
+****
 
 *link:index.html[Start Page]*

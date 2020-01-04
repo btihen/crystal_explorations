@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
 <meta name="author" content="Bill Tihen - using Crystal 0.32.1">
-<title>Crystal Lang Explorations</title>
+<title>Crystal Lang Channel Callbacks</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -439,7 +439,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
-<h1>Crystal Lang Explorations</h1>
+<h1>Crystal Lang Channel Callbacks</h1>
 <div class="details">
 <span id="author" class="author">Bill Tihen - using Crystal 0.32.1</span><br>
 <span id="revdate">Version 0.0.1</span>
@@ -447,13 +447,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toc" class="toc">
 <div id="toctitle">Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_installation">1. Installation</a></li>
-<li><a href="#_using_crystal_cli">2. Using Crystal CLI</a></li>
-<li><a href="#_concurrency">3. Concurrency</a></li>
-<li><a href="#_channels">4. Channels</a></li>
-<li><a href="#_channel_callbacks">5. Channel Callbacks</a></li>
-<li><a href="#_parallelism">6. Parallelism</a></li>
-<li><a href="#_macros">7. Macros</a></li>
+<li><a href="#_call_back_channels_when_closed">1. Call-Back Channels (when closed)</a></li>
 </ul>
 </div>
 </div>
@@ -467,20 +461,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Exploring &amp; Learning Crystal Language via topics that are interesting <em>(at least to me)</em> and hopefully augment it&#8217;s documentation.  This will be light on theory (lots of that available) and focus on exploring the code and how it works.</p>
 </div>
 <div class="paragraph">
-<p>Resources that helped are:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Crystal Lang API Docs - <a href="https://crystal-lang.org/api/0.32.1/" class="bare">https://crystal-lang.org/api/0.32.1/</a></p>
-</li>
-<li>
-<p>Crystal Lang GitBook - <a href="https://crystal-lang.org/reference/guides" class="bare">https://crystal-lang.org/reference/guides</a></p>
-</li>
-<li>
-<p>I also found the <strong>Crystal Lang Gitter - <a href="https://gitter.im/crystal-lang/crystal" class="bare">https://gitter.im/crystal-lang/crystal</a></strong> folks instrumental in helping me better undstand and putting these ideas into a context where I could write code that works.</p>
-</li>
-</ul>
+<p>Resources that helped are:
+* Crystal Lang API Docs - <a href="https://crystal-lang.org/api/0.32.1/Fiber.html" class="bare">https://crystal-lang.org/api/0.32.1/Fiber.html</a>
+* Crystal Lang GitBook - <a href="https://crystal-lang.org/reference/guides/concurrency.html" class="bare">https://crystal-lang.org/reference/guides/concurrency.html</a>
+I also found the <strong>Crystal Lang Gitter - <a href="https://gitter.im/crystal-lang/crystal" class="bare">https://gitter.im/crystal-lang/crystal</a></strong> folks instrumental in helping me better undstand and putting these ideas into a context where I could write code that works.</p>
 </div>
 <div class="admonitionblock warning">
 <table>
@@ -497,146 +481,7 @@ This code does not focus on best practices, security or production ready code.  
 </div>
 </div>
 <div class="sect1">
-<h2 id="_installation">1. Installation</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Please see <a href="https://crystal-lang.org/install/" class="bare">https://crystal-lang.org/install/</a></p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_using_crystal_cli">2. Using Crystal CLI</h2>
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>get cli help</p>
-</li>
-</ul>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code>crystal -h</code></pre>
-</div>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>generate a new app:</p>
-</li>
-</ul>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code>crystal init app project_name
-cd project_name</code></pre>
-</div>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>compile and run (while developing):</p>
-</li>
-</ul>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code>crystal run src/code.cr</code></pre>
-</div>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>compile to executable and run:</p>
-</li>
-</ul>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code>crystal build src/file.cr
-./file</code></pre>
-</div>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>compile and optimize build (for release into the wild):</p>
-</li>
-</ul>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code>crystal build --release src/file.cr -o new_name
-./new_name</code></pre>
-</div>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>compile with Parallelism enabled (experimental) - <a href="https://crystal-lang.org/2019/09/06/parallelism-in-crystal.html" class="bare">https://crystal-lang.org/2019/09/06/parallelism-in-crystal.html</a></p>
-</li>
-</ul>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code>crystal build -Dpreview_mt code.cr -o code
-$ ./code                   # defaul is 4 workers
-$ CRYSTAL_WORKERS=2 ./code # uses two CPUS
-$ CRYSTAL_WORKERS=4 ./code # same as default</code></pre>
-</div>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>compile and run (all) specs:</p>
-</li>
-</ul>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code>crystal spec</code></pre>
-</div>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>build docs from code comments</p>
-</li>
-</ul>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code>crystal docs</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_concurrency">3. <a href="concurrency.html">Concurrency</a></h2>
-<div class="sectionbody">
-
-</div>
-</div>
-<div class="sect1">
-<h2 id="_channels">4. <a href="channels.html">Channels</a></h2>
-<div class="sectionbody">
-
-</div>
-</div>
-<div class="sect1">
-<h2 id="_channel_callbacks">5. <a href="channel_callbacks.html">Channel Callbacks</a></h2>
-<div class="sectionbody">
-
-</div>
-</div>
-<div class="sect1">
-<h2 id="_parallelism">6. <a href="parallelism.html">Parallelism</a></h2>
-<div class="sectionbody">
-
-</div>
-</div>
-<div class="sect1">
-<h2 id="_macros">7. Macros</h2>
+<h2 id="_call_back_channels_when_closed">1. Call-Back Channels (when closed)</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p><strong><a href="index.html">Index</a></strong></p>
@@ -646,7 +491,7 @@ $ CRYSTAL_WORKERS=4 ./code # same as default</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-04 20:09:11 +0100
+Last updated 2020-01-04 20:14:03 +0100
 </div>
 </div>
 </body>

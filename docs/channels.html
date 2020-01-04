@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
-<meta name="author" content="Bill Tihen">
-<title>Crystal Lang Concurrency &amp; Channels</title>
+<meta name="author" content="Bill Tihen - using Crystal 0.32.1">
+<title>Crystal Lang Channels</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -439,17 +439,22 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
-<h1>Crystal Lang Concurrency &amp; Channels</h1>
+<h1>Crystal Lang Channels</h1>
 <div class="details">
-<span id="author" class="author">Bill Tihen</span><br>
+<span id="author" class="author">Bill Tihen - using Crystal 0.32.1</span><br>
 <span id="revdate">Version 0.0.1</span>
 </div>
 <div id="toc" class="toc">
 <div id="toctitle">Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_concurrency">1. Concurrency</a></li>
-<li><a href="#_parallelism">2. Parallelism</a></li>
-<li><a href="#_macros">3. Macros</a></li>
+<li><a href="#_channels">1. Channels</a>
+<ul class="sectlevel2">
+<li><a href="#_simple_channels_between_objects">1.1. Simple Channels (between Objects)</a></li>
+<li><a href="#_closing_channels">1.2. Closing Channels</a></li>
+<li><a href="#_stress_testing">1.3. Stress Testing</a></li>
+<li><a href="#_call_back_channels_to_finish">1.4. Call-Back Channels (to Finish)</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -457,12 +462,15 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
+<p><strong><a href="index.html">Index</a></strong></p>
+</div>
+<div class="paragraph">
 <p>Exploring &amp; Learning Crystal Language via topics that are interesting <em>(at least to me)</em> and hopefully augment it&#8217;s documentation.  This will be light on theory (lots of that available) and focus on exploring the code and how it works.</p>
 </div>
 <div class="paragraph">
 <p>Resources that helped are:
-* Crystal Lang API Docs - <a href="https://crystal-lang.org/api/0.32.1/" class="bare">https://crystal-lang.org/api/0.32.1/</a>
-* Crystal Lang GitBook - <a href="https://crystal-lang.org/reference/guides" class="bare">https://crystal-lang.org/reference/guides</a>
+* Crystal Lang API Docs - <a href="https://crystal-lang.org/api/0.32.1/Fiber.html" class="bare">https://crystal-lang.org/api/0.32.1/Fiber.html</a>
+* Crystal Lang GitBook - <a href="https://crystal-lang.org/reference/guides/concurrency.html" class="bare">https://crystal-lang.org/reference/guides/concurrency.html</a>
 I also found the <strong>Crystal Lang Gitter - <a href="https://gitter.im/crystal-lang/crystal" class="bare">https://gitter.im/crystal-lang/crystal</a></strong> folks instrumental in helping me better undstand and putting these ideas into a context where I could write code that works.</p>
 </div>
 <div class="admonitionblock warning">
@@ -480,27 +488,319 @@ This code does not focus on best practices, security or production ready code.  
 </div>
 </div>
 <div class="sect1">
-<h2 id="_concurrency">1. Concurrency</h2>
+<h2 id="_channels">1. Channels</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>Channels are how Crystal communicates between Fibers.  Crystal Channels are based on the CSP model (Communicating with Sequential Processes), which basically, the messages arrive are are handled strickly sequentially.  The order in which messages by the receiving object are handled in the same order they enter the channel queue (FIFO - First-In First-Out).</p>
+</div>
+<div class="paragraph">
+<p>We will use channels to communicate between Users listening concurrently for message arrivals.</p>
+</div>
+<div class="sect2">
+<h3 id="_simple_channels_between_objects">1.1. Simple Channels (between Objects)</h3>
+<div class="paragraph">
+<p>In the following code the <code>User</code> creates a fiber that listens to new messages on its <code>channel</code> to receive messages asynchronously.  We <code>channel.receive</code> <strong>(listen)</strong> for new messages within a <strong>spawn block</strong> to create a <code>fiber</code> that loops waiting to receive and process new messages <em>(basically making our own even loop listening for messages over a channel).</em></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-crystal" data-lang="crystal"># src/simple_channels/user.cr
 
-</div>
-</div>
-<div class="sect1">
-<h2 id="_parallelism">2. Parallelism</h2>
-<div class="sectionbody">
+class User
+  getter channel : Channel(String)
+  private getter name : String, email : String
 
-</div>
-</div>
-<div class="sect1">
-<h2 id="_macros">3. Macros</h2>
-<div class="sectionbody">
+  def initialize(@name, @email)
+    @channel = Channel(String).new # create a message channel that expects to receive a string
+    listen_for_messages            # start listening for new incoming messages
+  end
 
+  def to_s
+    "#{name} &lt;#{email}&gt;"
+  end
+
+  # Creates a Fiber 'loop' waiting for messages to arrive
+  # crystal switches fibers after each lap through the loop
+  private def listen_for_messages
+    spawn do
+      loop do
+        message = channel.receive? # check for new messages
+        break if message.nil?      # skip message processing without a message (which would cause an exception)
+
+        puts "To: #{to_s} -- #{message}"
+      end
+    end
+  end
+end</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To use the above code we will make two users and send each messages from Crystal&#8217;s main thread directly to their respective channels.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-crystal" data-lang="crystal"># src/simple_channels/main.cr
+require "./user"
+
+# USAGE
+module Main
+  # create users
+  user_1 = SimpleUser.new(name: "first",  email: "first@example.ch")
+  user_2 = SimpleUser.new(name: "second", email: "second@example.ch")
+
+  # send messages
+  puts "REAL-TIME - START"
+
+  # send an async message
+  spawn user_1.channel.send("ASYNC sent 1st")
+
+  # send a synchronous message
+  user_1.channel.send("REAL-TIME sent 2nd")
+  user_1.channel.send("REAL-TIME sent 3rd")
+
+  puts "SWITCH to user_2"
+  spawn user_2.channel.send("ASYNC sent 4th")
+  user_2.channel.send("REAL-TIME sent 5th")
+
+  puts "SWITCH back to user_1"
+  user_1.channel.send("REAL-TIME sent 6th")
+  spawn user_1.channel.send("ASYNC sent 7th")
+  puts "REAL-TIME - DONE"
+
+  # Allow Fibers (async messages) to execute
+  Fiber.yield
+end</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_closing_channels">1.2. Closing Channels</h3>
+<div class="paragraph">
+<p>It would be nice to be able to wait and end the main thread when all the channels to ensure all messages get delivered.  It can also be important for the Garbarge collector when using lots of objects.  Objects that are not longer needed - won&#8217;t be garbage collected if their are still monitoring a channel for messages.</p>
+</div>
+<div class="paragraph">
+<p>In order to close channels we can use <code>object.channel.close</code> - to check if a channel is closed we can use: <code>object.channel.closed?</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-crystal" data-lang="crystal"># src/simple_channels/main_close.cr
+require "./user"
+
+# USAGE
+module MainClose
+  # create users
+  user_1 = User.new(name: "first",  email: "first@example.ch")
+  user_2 = User.new(name: "second", email: "second@example.ch")
+
+  # send messages
+  puts "REAL-TIME - START"
+
+  # send an async message
+  spawn user_1.channel.send("ASYNC sent 1st")
+
+  # send a synchronous message
+  user_1.channel.send("REAL-TIME sent 2nd")
+  user_1.channel.send("REAL-TIME sent 3rd")
+
+  puts "SWITCH to user_2"
+  spawn user_2.channel.send("ASYNC sent 4th")
+  user_2.channel.send("REAL-TIME sent 5th")
+
+  puts "SWITCH back to user_1"
+  user_1.channel.send("REAL-TIME sent 6th")
+  spawn user_1.channel.send("ASYNC sent 7th")
+  puts "REAL-TIME - DONE"
+
+  # immediate close / cleanup Channels
+  user_1.channel.close
+  user_2.channel.close
+
+  # async close / cleanup Channels
+  # spawn user_1.channel.close
+  # spawn user_2.channel.close
+
+  Fiber.yield
+end</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Running this with immediate channel closing creates errors since closing the channel immediately means that messages in queued Fibers - waiting to deliver will suddenly loose their delivery channel.</p>
+</div>
+<div class="paragraph">
+<p>A simple solution for this is to send the close asynchronously.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_stress_testing">1.3. Stress Testing</h3>
+<div class="paragraph">
+<p>How well does our code work when messaging lots of objects?</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-crystal" data-lang="crystal"># src/simple_channels/main_stress.cr
+require "./user"
+
+module MainStress
+
+  # make a large number of users
+  users  = [] of User
+  status = Channel(Nil).new
+  10000.times do |i|
+    user = User.new(name: "user_#{i}",  email: "user_#{i}@example.ch")
+    users &lt;&lt; user
+  end
+
+  # send lots of messages
+  users.each do |receiver|
+    # async messaging
+    spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
+
+    # synchronous messaging
+    # receiver.channel.send("SYNC -- From: #{receiver.to_s} - with channel")
+  end
+
+  # close user channels
+  users.each do |receiver|
+    # synchronous channel closing
+    receiver.channel.close
+
+    # close asynchronously to allow messages to be delivered
+    # spawn receiver.channel.close
+  end
+
+  # wait for all channels to close before allowing main to terminate
+  Fiber.yield
+
+  # loop do
+  #   break if users.all?{ |u| u.channel.closed? } # are all channels are closed?
+  #   Fiber.yield
+  # end
+end</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Run the following with:
+<code>crystal src/simple_channels/main_stress.cr</code></p>
+</div>
+<div class="paragraph">
+<p>With the simple <code>Fiber.yield</code> we get a lot of exceptions since the channels then we wait for the async messages to be delivered.</p>
+</div>
+<div class="paragraph">
+<p>To solve this simply comment out the synchronous channel closing and use asycn closing, i.e.:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-crystal" data-lang="crystal"># close user channels
+users.each do |receiver|
+  # synchronous channel closing
+  # receiver.channel.close
+
+  # close asynchronously to allow messages to be delivered
+  spawn receiver.channel.close
+end</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Unfortunately, if messages are sent asynchronously - then <code>Fiber.yield</code> with enough objects - perhaps only 80-90% of the messages have time to get handled before <code>main</code> ends. To see this change the sending to asynchronous messaging with:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-crystal" data-lang="crystal"># send lots of messages
+users.each do |receiver|
+  # async messaging
+  # spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
+
+  # synchronous messaging
+  receiver.channel.send("SYNC -- From: #{receiver.to_s} - with channel")
+end</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To fix this we need to actually wait and test that all channels are closed.  Change the wait code to:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-crystal" data-lang="crystal"># wait for all channels to close before allowing main to terminate
+# Fiber.yield
+
+loop do
+  break if users.all?{ |u| u.channel.closed? } # are all channels are closed?
+  Fiber.yield
+end</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now all the messages are delivered again.</p>
+</div>
+<div class="paragraph">
+<p>Interestingly we get errors if we enable both synchronous and asynchronous message sending, i.e.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-crystal" data-lang="crystal"># send lots of messages
+users.each do |receiver|
+  # async messaging
+  spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
+
+  # synchronous messaging
+  receiver.channel.send("SYNC -- From: #{receiver.to_s} - with channel")
+end</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In this case: I suggest the following code to use <code>user</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code># src/simple_channels/main_stress.cr
+require "./user"
+
+module MainStress
+
+  # make a large number of users
+  users  = [] of User
+  status = Channel(Nil).new
+  1000.times do |i|
+    user = User.new(name: "user_#{i}",  email: "user_#{i}@example.ch")
+    users &lt;&lt; user
+  end
+
+  # send lots of messages
+  users.each do |receiver|
+    # async messaging
+    spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
+
+    # synchronous messaging
+    # receiver.channel.send("SYNC -- From: #{receiver.to_s} - with channel")
+  end
+
+  # close user channels
+  users.each do |receiver|
+    # close asynchronously to allow messages to be delivered
+    spawn receiver.channel.close
+  end
+
+
+  # wait for all channels to close before allowing main to terminate
+  loop do
+    break if users.all?{ |u| u.channel.closed? } # are all channels are closed?
+    Fiber.yield
+  end
+end</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_call_back_channels_to_finish">1.4. Call-Back Channels (to Finish)</h3>
+<div class="paragraph">
+<p><strong><a href="index.html">Index</a></strong></p>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-04 19:26:30 +0100
+Last updated 2020-01-04 20:08:49 +0100
 </div>
 </div>
 </body>

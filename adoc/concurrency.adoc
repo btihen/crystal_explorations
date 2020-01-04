@@ -7,23 +7,17 @@ Version 0.0.1
 :toc-title: Contents
 
 :description: Exploring Crystal's Features
-:source-highlighter: prettify
+:source-highlighter: coderay
+:source-language: ruby
 :keywords: Crystal Language
 :imagesdir: ./images
 
+*link:index.html[Start Page]*
 
-*link:index.html[Index]*
+Exploring & Learning Crystal Language with code examples and augment the documentation.
 
-
-Exploring & Learning Crystal Language via topics that are interesting _(at least to me)_ and hopefully augment it's documentation.  This will be light on theory (lots of that available) and focus on exploring the code and how it works.
-
-Resources that helped are:
-
-* Crystal Lang API Docs - https://crystal-lang.org/api/0.32.1/Fiber.html
-* Crystal Lang GitBook - https://crystal-lang.org/reference/guides/concurrency.html
-* *Crystal Lang Gitter - https://gitter.im/crystal-lang/crystal* folks instrumental in helping me better undstand and putting these ideas into a context where I could write code that works.
-
-WARNING: This code does not focus on best practices, security or production ready code.  The code is just good enough to demonstrate what is happening.
+NOTE: This code does not focus on best practices, security or production ready code. +
+The code is just good enough to demonstrate what is happening.
 
 == Concurrency
 
@@ -45,8 +39,9 @@ There two main way to `spawn` threads - we will need both:
 
 A spawn block looks like:
 
-```crystal
-# src/concurrency/spawn_block.cr
+.src/concurrency/spawn_block.cr
+[source]
+----
 puts "before spawn"
 spawn do
   puts "within spawn"
@@ -54,18 +49,22 @@ end
 puts "after spawn"
 
 # Fiber.yield
+----
+
+Run with:
 ```
-Notice when we run:
-`crystal run src/concurrency/spawn_block.cr`
-We don't see the text _within spawn_
+crystal src/concurrency/spawn_block.cr
+```
+
+NOTE: We don't see the text *within spawn*
 
 In order to get the main thread to let the Fiber run before ending we need to uncomment the `Fiber.yield` and run again - this tells the main thread to process the fibers on the *main thread* - later we will see there are other actions that trigger the *main thread* to yield to the Fibers.
 
 Spawn block - uses the value given at the time when the Fiber is executed - which can lead to unexpected results. Try the following code:
 
-```crystal
-# src/concurrency/spawn_block_unexpected.cr
-
+.src/concurrency/spawn_block_unexpected.cr
+[source]
+----
 i = 0
 spawn do
   puts i
@@ -78,6 +77,11 @@ end
 
 # i = 1 when the main thread yields to the fibers!
 Fiber.yield
+----
+
+Run with:
+```
+crystal src/concurrency/spawn_block_unexpected.cr
 ```
 
 Because i = 1 at the time when the fibers execute '1' is printed twice - this is probably not desired in this case.  The solution is to use `Proc`
@@ -85,9 +89,10 @@ Because i = 1 at the time when the fibers execute '1' is printed twice - this is
 The solution is to define a proc which will pass the value at the time the `Proc` is called NOT when the `Fiber` is executed.
 
 This code works as expected, but is clumsy looking:
-```crystal
-# src/concurrency/spawn_proc_block.cr
 
+.src/concurrency/spawn_proc_block.cr
+[source]
+----
 i = 0
 puts_0 = ->(x : Int32) do
   spawn do
@@ -105,15 +110,22 @@ end
 puts_1.call(i)
 
 Fiber.yield
+----
+
+Run with:
 ```
+crystal src/concurrency/spawn_proc_block.cr
+```
+
+NOTE: now all works well - but lots of code for 2 simple `puts` statements.
 
 === Spawn Method Call
 
-Another *much nicer* way to pass the value at the time of call -- not at the time of execution is to use the `spawn` call:
+A *much nicer* way to pass the value at the time of call -- not at the time of execution is to use the `spawn` call:
 
-```crystal
-# src/concurrency/spawn_call.cr
-
+.src/concurrency/spawn_call.cr
+[source]
+----
 i = 0
 puts i
 
@@ -121,6 +133,11 @@ i = 1
 puts i
 
 Fiber.yield
+----
+
+Run with:
+```
+crystal src/concurrency/spawn_call.cr
 ```
 
 This is syntactic sugar (a crystal `macro`) for `proc`-`spawn` technique shown above.  I find this syntax far more attractive and will be used for method calls from now on!
@@ -131,9 +148,9 @@ We `spawn` to other objects for concurrent processing.  This next code sample sh
 
 Here is our base `User` object:
 
-```crystal
-# src/concurrency/user.cr
-
+.src/concurrency/user.cr
+[source]
+----
 class User
   getter channel : Channel(String)
   private getter name : String, email : String
@@ -150,12 +167,14 @@ class User
     puts "To: #{to_s} -- #{message}"
   end
 end
-```
+----
 
-Use concurrently with:
-```
-# src/concurrency/user_messaging.cr
-require "./user"
+To use with concurrency:
+
+.src/concurrency/user_messaging.cr
+[source]
+----
+require "./user"     # autoloads the above user.cr file
 
 # USAGE
 module UserMessaging
@@ -185,8 +204,13 @@ module UserMessaging
   # Allow Fibers (async messages) to execute
   Fiber.yield
 end
+----
+
+Run with:
+```
+crystal src/concurrency/spawn_call.cr
 ```
 
 Just a reminder, notice how all async messages happen after `Fiber.yield`
 
-*link:index.html[Index]*
+*link:index.html[Start Page]*

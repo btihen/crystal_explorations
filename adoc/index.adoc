@@ -1,43 +1,44 @@
 = Crystal Lang Explorations
 Bill Tihen (Crystal 0.32.1)
 Version 0.0.1
-:sectnums:
-:toc:
-:toclevels: 4
-:toc-title: Contents
 
 :description: Exploring Crystal's Features
-:source-highlighter: prettify
+:source-highlighter: rouge
+:source-language: crystal
 :keywords: Crystal Language
 :imagesdir: ./images
 
-*link:index.html[Index]*
+Exploring & Learning Crystal Language with code examples and augment the documentation.
 
-Exploring & Learning Crystal Language via topics that are interesting _(at least to me)_ and hopefully augment it's documentation.  This will be light on theory (lots of that available) and focus on exploring the code and how it works.
+NOTE: This code does not focus on best practices, security or production ready code. +
+The code is just good enough to demonstrate what is happening.
 
-Resources that helped are:
+== Contents
+
+=== Installation
+
+Please see https://crystal-lang.org/install/
+
+=== link:cli.html[Crystal CLI]
+
+=== link:concurrency.html[Concurrency]
+
+=== link:channels.html[Channels]
+
+=== Channel Callbacks
+
+=== Parallelism
+
+=== Macros
+
+=== Resources
 
 * Crystal Lang API Docs - https://crystal-lang.org/api/0.32.1/
 * Crystal Lang GitBook - https://crystal-lang.org/reference/guides
 * *Crystal Lang Gitter - https://gitter.im/crystal-lang/crystal* folks instrumental in helping me better undstand and putting these ideas into a context where I could write code that works.
 
-WARNING: This code does not focus on best practices, security or production ready code.  The code is just good enough to demonstrate what is happening.
+=== Corrections & Improvements
 
-== Installation
+- please make a https://github.com/btihen/crystal_explorations/issues/new[github issue], a pull request or contact me to improve this document.
 
-Please see https://crystal-lang.org/install/
-
-== link:cli.html[Crystal CLI]
-
-== link:concurrency.html[Concurrency]
-
-== link:channels.html[Channels]
-
-== link:channel_callbacks.html[Channel Callbacks]
-
-== link:parallelism.html[Parallelism]
-
-== Macros
-
-
-*link:index.html[Index]*
+Thanks!

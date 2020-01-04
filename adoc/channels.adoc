@@ -7,22 +7,18 @@ Version 0.0.1
 :toc-title: Contents
 
 :description: Exploring Crystal's Features
-:source-highlighter: prettify
+:source-highlighter: rouge
+:source-language: crystal
 :keywords: Crystal Language
 :imagesdir: ./images
 
 
-*link:index.html[Index]*
+*link:index.html[Start Page]*
 
+Exploring & Learning Crystal Language with code examples and augment the documentation.
 
-Exploring & Learning Crystal Language via topics that are interesting _(at least to me)_ and hopefully augment it's documentation.  This will be light on theory (lots of that available) and focus on exploring the code and how it works.
-
-Resources that helped are:
-* Crystal Lang API Docs - https://crystal-lang.org/api/0.32.1/Fiber.html
-* Crystal Lang GitBook - https://crystal-lang.org/reference/guides/concurrency.html
-* *Crystal Lang Gitter - https://gitter.im/crystal-lang/crystal* folks instrumental in helping me better undstand and putting these ideas into a context where I could write code that works.
-
-WARNING: This code does not focus on best practices, security or production ready code.  The code is just good enough to demonstrate what is happening.
+NOTE: This code does not focus on best practices, security or production ready code. +
+The code is just good enough to demonstrate what is happening.
 
 == Channels
 
@@ -34,9 +30,10 @@ We will use channels to communicate between Users listening concurrently for mes
 
 In the following code the `User` creates a fiber that listens to new messages on its `channel` to receive messages asynchronously.  We `channel.receive` *(listen)* for new messages within a *spawn block* to create a `fiber` that loops waiting to receive and process new messages _(basically making our own even loop listening for messages over a channel)._
 
-```crystal
-# src/simple_channels/user.cr
 
+.src/simple_channels/user.cr
+[source,crystal]
+----
 class User
   getter channel : Channel(String)
   private getter name : String, email : String
@@ -56,19 +53,20 @@ class User
     spawn do
       loop do
         message = channel.receive? # check for new messages
-        break if message.nil?      # skip message processing without a message (which would cause an exception)
+        break if message.nil?      # skip processing without a message (avoid an exception)
 
         puts "To: #{to_s} -- #{message}"
       end
     end
   end
 end
-```
+----
 
 To use the above code we will make two users and send each messages from Crystal's main thread directly to their respective channels.
 
-```crystal
-# src/simple_channels/main.cr
+.src/simple_channels/main.cr
+[source]
+----
 require "./user"
 
 # USAGE
@@ -99,7 +97,15 @@ module Main
   # Allow Fibers (async messages) to execute
   Fiber.yield
 end
+----
+
+.Run with:
+****
+Run this code with:
 ```
+crystal src/simple_channels/main.cr
+```
+****
 
 === Closing Channels
 
@@ -107,8 +113,9 @@ It would be nice to be able to wait and end the main thread when all the channel
 
 In order to close channels we can use `object.channel.close` - to check if a channel is closed we can use: `object.channel.closed?`
 
-```crystal
-# src/simple_channels/main_close.cr
+.src/simple_channels/main_close.cr
+[source]
+----
 require "./user"
 
 # USAGE
@@ -146,7 +153,15 @@ module MainClose
 
   Fiber.yield
 end
+----
+
+.Run with:
+****
+Run this code with:
 ```
+crystal src/simple_channels/main_close.cr
+```
+****
 
 Running this with immediate channel closing creates errors since closing the channel immediately means that messages in queued Fibers - waiting to deliver will suddenly loose their delivery channel.
 
@@ -156,8 +171,9 @@ A simple solution for this is to send the close asynchronously.
 
 How well does our code work when messaging lots of objects?
 
-```crystal
-# src/simple_channels/main_stress.cr
+.src/simple_channels/main_stress.cr
+[source]
+----
 require "./user"
 
 module MainStress
@@ -196,10 +212,15 @@ module MainStress
   #   Fiber.yield
   # end
 end
-```
+----
 
-Run the following with:
-`crystal src/simple_channels/main_stress.cr`
+.Run with:
+****
+Run this code with:
+```
+crystal src/simple_channels/main_stress.cr
+```
+****
 
 With the simple `Fiber.yield` we get a lot of exceptions since the channels then we wait for the async messages to be delivered.
 
@@ -253,8 +274,9 @@ end
 ```
 
 In this case: I suggest the following code to use `user`:
-```
-# src/simple_channels/main_stress.cr
+.src/simple_channels/main_stress.cr
+[source]
+----
 require "./user"
 
 module MainStress
@@ -289,9 +311,7 @@ module MainStress
     Fiber.yield
   end
 end
-```
-
-=== Call-Back Channels (to Finish)
+----
 
 
-*link:index.html[Index]*
+*link:index.html[Start Page]*

@@ -452,7 +452,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_simple_channels_between_objects">1.1. Simple Channels (between Objects)</a></li>
 <li><a href="#_closing_channels">1.2. Closing Channels</a></li>
 <li><a href="#_stress_testing">1.3. Stress Testing</a></li>
-<li><a href="#_call_back_channels_to_finish">1.4. Call-Back Channels (to Finish)</a></li>
 </ul>
 </li>
 </ul>
@@ -462,25 +461,20 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p><strong><a href="index.html">Index</a></strong></p>
+<p><strong><a href="index.html">Start Page</a></strong></p>
 </div>
 <div class="paragraph">
-<p>Exploring &amp; Learning Crystal Language via topics that are interesting <em>(at least to me)</em> and hopefully augment it&#8217;s documentation.  This will be light on theory (lots of that available) and focus on exploring the code and how it works.</p>
+<p>Exploring &amp; Learning Crystal Language with code examples and augment the documentation.</p>
 </div>
-<div class="paragraph">
-<p>Resources that helped are:
-* Crystal Lang API Docs - <a href="https://crystal-lang.org/api/0.32.1/Fiber.html" class="bare">https://crystal-lang.org/api/0.32.1/Fiber.html</a>
-* Crystal Lang GitBook - <a href="https://crystal-lang.org/reference/guides/concurrency.html" class="bare">https://crystal-lang.org/reference/guides/concurrency.html</a>
-* <strong>Crystal Lang Gitter - <a href="https://gitter.im/crystal-lang/crystal" class="bare">https://gitter.im/crystal-lang/crystal</a></strong> folks instrumental in helping me better undstand and putting these ideas into a context where I could write code that works.</p>
-</div>
-<div class="admonitionblock warning">
+<div class="admonitionblock note">
 <table>
 <tr>
 <td class="icon">
-<div class="title">Warning</div>
+<div class="title">Note</div>
 </td>
 <td class="content">
-This code does not focus on best practices, security or production ready code.  The code is just good enough to demonstrate what is happening.
+This code does not focus on best practices, security or production ready code.<br>
+The code is just good enough to demonstrate what is happening.
 </td>
 </tr>
 </table>
@@ -502,10 +496,9 @@ This code does not focus on best practices, security or production ready code.  
 <p>In the following code the <code>User</code> creates a fiber that listens to new messages on its <code>channel</code> to receive messages asynchronously.  We <code>channel.receive</code> <strong>(listen)</strong> for new messages within a <strong>spawn block</strong> to create a <code>fiber</code> that loops waiting to receive and process new messages <em>(basically making our own even loop listening for messages over a channel).</em></p>
 </div>
 <div class="listingblock">
+<div class="title">src/simple_channels/user.cr</div>
 <div class="content">
-<pre class="highlight"><code class="language-crystal" data-lang="crystal"># src/simple_channels/user.cr
-
-class User
+<pre class="highlight"><code class="language-crystal" data-lang="crystal">class User
   getter channel : Channel(String)
   private getter name : String, email : String
 
@@ -524,7 +517,7 @@ class User
     spawn do
       loop do
         message = channel.receive? # check for new messages
-        break if message.nil?      # skip message processing without a message (which would cause an exception)
+        break if message.nil?      # skip processing without a message (avoid an exception)
 
         puts "To: #{to_s} -- #{message}"
       end
@@ -537,9 +530,9 @@ end</code></pre>
 <p>To use the above code we will make two users and send each messages from Crystal&#8217;s main thread directly to their respective channels.</p>
 </div>
 <div class="listingblock">
+<div class="title">src/simple_channels/main.cr</div>
 <div class="content">
-<pre class="highlight"><code class="language-crystal" data-lang="crystal"># src/simple_channels/main.cr
-require "./user"
+<pre class="highlight"><code class="language-crystal" data-lang="crystal">require "./user"
 
 # USAGE
 module Main
@@ -571,6 +564,19 @@ module Main
 end</code></pre>
 </div>
 </div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Run with:</div>
+<div class="paragraph">
+<p>Run this code with:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-crystal" data-lang="crystal">crystal src/simple_channels/main.cr</code></pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_closing_channels">1.2. Closing Channels</h3>
@@ -581,9 +587,9 @@ end</code></pre>
 <p>In order to close channels we can use <code>object.channel.close</code> - to check if a channel is closed we can use: <code>object.channel.closed?</code></p>
 </div>
 <div class="listingblock">
+<div class="title">src/simple_channels/main_close.cr</div>
 <div class="content">
-<pre class="highlight"><code class="language-crystal" data-lang="crystal"># src/simple_channels/main_close.cr
-require "./user"
+<pre class="highlight"><code class="language-crystal" data-lang="crystal">require "./user"
 
 # USAGE
 module MainClose
@@ -622,6 +628,19 @@ module MainClose
 end</code></pre>
 </div>
 </div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Run with:</div>
+<div class="paragraph">
+<p>Run this code with:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-crystal" data-lang="crystal">crystal src/simple_channels/main_close.cr</code></pre>
+</div>
+</div>
+</div>
+</div>
 <div class="paragraph">
 <p>Running this with immediate channel closing creates errors since closing the channel immediately means that messages in queued Fibers - waiting to deliver will suddenly loose their delivery channel.</p>
 </div>
@@ -635,9 +654,9 @@ end</code></pre>
 <p>How well does our code work when messaging lots of objects?</p>
 </div>
 <div class="listingblock">
+<div class="title">src/simple_channels/main_stress.cr</div>
 <div class="content">
-<pre class="highlight"><code class="language-crystal" data-lang="crystal"># src/simple_channels/main_stress.cr
-require "./user"
+<pre class="highlight"><code class="language-crystal" data-lang="crystal">require "./user"
 
 module MainStress
 
@@ -677,9 +696,18 @@ module MainStress
 end</code></pre>
 </div>
 </div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Run with:</div>
 <div class="paragraph">
-<p>Run the following with:
-<code>crystal src/simple_channels/main_stress.cr</code></p>
+<p>Run this code with:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-crystal" data-lang="crystal">crystal src/simple_channels/main_stress.cr</code></pre>
+</div>
+</div>
+</div>
 </div>
 <div class="paragraph">
 <p>With the simple <code>Fiber.yield</code> we get a lot of exceptions since the channels then we wait for the async messages to be delivered.</p>
@@ -747,12 +775,12 @@ end</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>In this case: I suggest the following code to use <code>user</code>:</p>
+<p>In this case: I suggest the following code to use <code>user</code>:
+.src/simple_channels/main_stress.cr</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code># src/simple_channels/main_stress.cr
-require "./user"
+<pre class="highlight"><code class="language-crystal" data-lang="crystal">require "./user"
 
 module MainStress
 
@@ -788,11 +816,8 @@ module MainStress
 end</code></pre>
 </div>
 </div>
-</div>
-<div class="sect2">
-<h3 id="_call_back_channels_to_finish">1.4. Call-Back Channels (to Finish)</h3>
 <div class="paragraph">
-<p><strong><a href="index.html">Index</a></strong></p>
+<p><strong><a href="index.html">Start Page</a></strong></p>
 </div>
 </div>
 </div>
@@ -800,7 +825,7 @@ end</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-04 20:20:11 +0100
+Last updated 2020-01-04 21:23:31 +0100
 </div>
 </div>
 </body>

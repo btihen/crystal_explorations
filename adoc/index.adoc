@@ -39,6 +39,6 @@ Please see https://crystal-lang.org/install/
 
 === Corrections & Improvements
 
-- please make a https://github.com/btihen/crystal_explorations/issues/new[github issue], a pull request or contact me to improve this document.
+- please make a https://github.com/btihen/crystal_explorations/issues[Github issue], a pull request or contact me to improve this document.
 
 Thanks!

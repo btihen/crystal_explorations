@@ -18,9 +18,10 @@ Version 0.0.1
 Exploring & Learning Crystal Language via topics that are interesting _(at least to me)_ and hopefully augment it's documentation.  This will be light on theory (lots of that available) and focus on exploring the code and how it works.
 
 Resources that helped are:
+
 * Crystal Lang API Docs - https://crystal-lang.org/api/0.32.1/Fiber.html
 * Crystal Lang GitBook - https://crystal-lang.org/reference/guides/concurrency.html
-I also found the *Crystal Lang Gitter - https://gitter.im/crystal-lang/crystal* folks instrumental in helping me better undstand and putting these ideas into a context where I could write code that works.
+* *Crystal Lang Gitter - https://gitter.im/crystal-lang/crystal* folks instrumental in helping me better undstand and putting these ideas into a context where I could write code that works.
 
 WARNING: This code does not focus on best practices, security or production ready code.  The code is just good enough to demonstrate what is happening.
 

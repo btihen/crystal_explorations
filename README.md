@@ -2,7 +2,7 @@
 
 ### Website
 
-https://btihen.github.io/crystal_explorations
+https://btihen.github.io/crystal_explorations/index.html
 
 Enjoy!
 

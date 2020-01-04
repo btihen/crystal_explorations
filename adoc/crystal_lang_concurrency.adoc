@@ -1,0 +1,457 @@
+= Crystal Lang Concurrency & Channels
+Bill Tihen
+Version 0.0.1
+:sectnums:
+:toc:
+:toclevels: 4
+:toc-title: Contents
+
+:description: Exploring Crystal's Features
+:source-highlighter: prettify
+:keywords: Crystal Language
+:imagesdir: ./images
+
+Exploring & Learning Crystal Language via topics that are interesting _(at least to me)_ and hopefully augment it's documentation.  This will be light on theory (lots of that available) and focus on exploring the code and how it works.
+
+Resources that helped are:
+* Crystal Lang API Docs - https://crystal-lang.org/api/0.32.1/Fiber.html
+* Crystal Lang GitBook - https://crystal-lang.org/reference/guides/concurrency.html
+I also found the *Crystal Lang Gitter - https://gitter.im/crystal-lang/crystal* folks instrumental in helping me better undstand and putting these ideas into a context where I could write code that works.
+
+WARNING: This code does not focus on best practices, security or production ready code.  The code is just good enough to demonstrate what is happening.
+
+== Concurrency
+
+By default when crystal code launches a *main thread* is created for the running code, a separate thread is created for the *garbage collector*, and an *Event Loop* to handle IO waits - allowing the main thread to continue while waiting for slow IO calls to finish.
+
+Concurrency happens by `spawn`ing `fiber`s _(light-weight sub-threads within the *main thread*)._  These `fiber`s are scheduled to run within the *main thread* on it's CPU.  Concurrency is a form of *multi-tasking* - quickly switching between tasks on the *main thead.*
+
+Parallelism - _with the appropriate compiler switches_ - allows processes to happen simultaneously on separate CPUs.
+
+=== Spawning Fibers Intro
+
+New Fibers are created using `spawn`.
+
+There two main way to `spawn` threads - we will need both:
+- using the block notation
+- using the method call notation
+
+=== Spawn Block
+
+A spawn block looks like:
+
+```crystal
+# src/concurrency/spawn_block.cr
+puts "before spawn"
+spawn do
+  puts "within spawn"
+end
+puts "after spawn"
+
+# Fiber.yield
+```
+Notice when we run:
+`crystal run src/concurrency/spawn_block.cr`
+We don't see the text _within spawn_
+
+In order to get the main thread to let the Fiber run before ending we need to uncomment the `Fiber.yield` and run again - this tells the main thread to process the fibers on the *main thread* - later we will see there are other actions that trigger the *main thread* to yield to the Fibers.
+
+Spawn block - uses the value given at the time when the Fiber is executed - which can lead to unexpected results. Try the following code:
+
+```crystal
+# src/concurrency/spawn_block_unexpected.cr
+
+i = 0
+spawn do
+  puts i
+end
+
+i = 1
+spawn do
+  puts i
+end
+
+# i = 1 when the main thread yields to the fibers!
+Fiber.yield
+```
+
+Because i = 1 at the time when the fibers execute '1' is printed twice - this is probably not desired in this case.  The solution is to use `Proc`
+
+The solution is to define a proc which will pass the value at the time the `Proc` is called NOT when the `Fiber` is executed.
+
+This code works as expected, but is clumsy looking:
+```crystal
+# src/concurrency/spawn_proc_block.cr
+
+i = 0
+puts_0 = ->(x : Int32) do
+  spawn do
+    puts(x)
+  end
+end
+puts_0.call(i)
+
+i = 1
+puts_1 = ->(x : Int32) do
+  spawn do
+    puts(x)
+  end
+end
+puts_1.call(i)
+
+Fiber.yield
+```
+
+=== Spawn Method Call
+
+Another *much nicer* way to pass the value at the time of call -- not at the time of execution is to use the `spawn` call:
+
+```crystal
+# src/concurrency/spawn_call.cr
+
+i = 0
+puts i
+
+i = 1
+puts i
+
+Fiber.yield
+```
+
+This is syntactic sugar (a crystal `macro`) for `proc`-`spawn` technique shown above.  I find this syntax far more attractive and will be used for method calls from now on!
+
+=== Spawning Fibers between Objects
+
+We `spawn` to other objects for concurrent processing.  This next code sample shows how to send both synchronous and asynchronous messages from the *main thread* to objects which will be evaluated within a `Fiber`.
+
+Here is our base `User` object:
+
+```crystal
+# src/concurrency/user.cr
+
+class User
+  getter channel : Channel(String)
+  private getter name : String, email : String
+
+  def initialize(@name, @email)
+    @channel = Channel(String).new
+  end
+
+  def to_s
+    "#{name} <#{email}>"
+  end
+
+  def post_message(message : String)
+    puts "To: #{to_s} -- #{message}"
+  end
+end
+```
+
+Use concurrently with:
+```
+# src/concurrency/user_messaging.cr
+require "./user"
+
+# USAGE
+module UserMessaging
+  # create users
+  user_1 = User.new(name: "first",  email: "first@example.ch")
+  user_2 = User.new(name: "second", email: "second@example.ch")
+
+  # send messages
+  puts "REAL-TIME - START"
+
+  # send an async message
+  spawn user_1.post_message("ASYNC sent 1st")
+
+  # send a synchronous message
+  user_1.post_message("REAL-TIME sent 2nd")
+  user_1.post_message("REAL-TIME sent 3rd")
+
+  puts "SWITCH to user_2"
+  spawn user_2.post_message("ASYNC sent 4th")
+  user_2.post_message("REAL-TIME sent 5th")
+
+  puts "SWITCH back to user_1"
+  user_1.post_message("REAL-TIME sent 6th")
+  spawn user_1.post_message("ASYNC sent 7th")
+  puts "REAL-TIME - DONE"
+
+  # Allow Fibers (async messages) to execute
+  Fiber.yield
+end
+```
+
+Just a reminder, notice how all async messages happen after `Fiber.yield`
+
+== Channels
+
+Channels are how Crystal communicates between Fibers.  Crystal Channels are based on the CSP model (Communicating with Sequential Processes), which basically, the messages arrive are are handled strickly sequentially.  The order in which messages by the receiving object are handled in the same order they enter the channel queue (FIFO - First-In First-Out).
+
+We will use channels to communicate between Users listening concurrently for message arrivals.
+
+=== Simple Channels (between Objects)
+
+In the following code the `User` creates a fiber that listens to new messages on its `channel` to receive messages asynchronously.  We `channel.receive` *(listen)* for new messages within a *spawn block* to create a `fiber` that loops waiting to receive and process new messages _(basically making our own even loop listening for messages over a channel)._
+
+```crystal
+# src/simple_channels/user.cr
+
+class User
+  getter channel : Channel(String)
+  private getter name : String, email : String
+
+  def initialize(@name, @email)
+    @channel = Channel(String).new # create a message channel that expects to receive a string
+    listen_for_messages            # start listening for new incoming messages
+  end
+
+  def to_s
+    "#{name} <#{email}>"
+  end
+
+  # Creates a Fiber 'loop' waiting for messages to arrive
+  # crystal switches fibers after each lap through the loop
+  private def listen_for_messages
+    spawn do
+      loop do
+        message = channel.receive? # check for new messages
+        break if message.nil?      # skip message processing without a message (which would cause an exception)
+
+        puts "To: #{to_s} -- #{message}"
+      end
+    end
+  end
+end
+```
+
+To use the above code we will make two users and send each messages from Crystal's main thread directly to their respective channels.
+
+```crystal
+# src/simple_channels/main.cr
+require "./user"
+
+# USAGE
+module Main
+  # create users
+  user_1 = SimpleUser.new(name: "first",  email: "first@example.ch")
+  user_2 = SimpleUser.new(name: "second", email: "second@example.ch")
+
+  # send messages
+  puts "REAL-TIME - START"
+
+  # send an async message
+  spawn user_1.channel.send("ASYNC sent 1st")
+
+  # send a synchronous message
+  user_1.channel.send("REAL-TIME sent 2nd")
+  user_1.channel.send("REAL-TIME sent 3rd")
+
+  puts "SWITCH to user_2"
+  spawn user_2.channel.send("ASYNC sent 4th")
+  user_2.channel.send("REAL-TIME sent 5th")
+
+  puts "SWITCH back to user_1"
+  user_1.channel.send("REAL-TIME sent 6th")
+  spawn user_1.channel.send("ASYNC sent 7th")
+  puts "REAL-TIME - DONE"
+
+  # Allow Fibers (async messages) to execute
+  Fiber.yield
+end
+```
+
+=== Closing Channels
+
+It would be nice to be able to wait and end the main thread when all the channels to ensure all messages get delivered.  It can also be important for the Garbarge collector when using lots of objects.  Objects that are not longer needed - won't be garbage collected if their are still monitoring a channel for messages.
+
+In order to close channels we can use `object.channel.close` - to check if a channel is closed we can use: `object.channel.closed?`
+
+```crystal
+# src/simple_channels/main_close.cr
+require "./user"
+
+# USAGE
+module MainClose
+  # create users
+  user_1 = User.new(name: "first",  email: "first@example.ch")
+  user_2 = User.new(name: "second", email: "second@example.ch")
+
+  # send messages
+  puts "REAL-TIME - START"
+
+  # send an async message
+  spawn user_1.channel.send("ASYNC sent 1st")
+
+  # send a synchronous message
+  user_1.channel.send("REAL-TIME sent 2nd")
+  user_1.channel.send("REAL-TIME sent 3rd")
+
+  puts "SWITCH to user_2"
+  spawn user_2.channel.send("ASYNC sent 4th")
+  user_2.channel.send("REAL-TIME sent 5th")
+
+  puts "SWITCH back to user_1"
+  user_1.channel.send("REAL-TIME sent 6th")
+  spawn user_1.channel.send("ASYNC sent 7th")
+  puts "REAL-TIME - DONE"
+
+  # immediate close / cleanup Channels
+  user_1.channel.close
+  user_2.channel.close
+
+  # async close / cleanup Channels
+  # spawn user_1.channel.close
+  # spawn user_2.channel.close
+
+  Fiber.yield
+end
+```
+
+Running this with immediate channel closing creates errors since closing the channel immediately means that messages in queued Fibers - waiting to deliver will suddenly loose their delivery channel.
+
+A simple solution for this is to send the close asynchronously.
+
+=== Stress Testing
+
+How well does our code work when messaging lots of objects?
+
+```crystal
+# src/simple_channels/main_stress.cr
+require "./user"
+
+module MainStress
+
+  # make a large number of users
+  users  = [] of User
+  status = Channel(Nil).new
+  10000.times do |i|
+    user = User.new(name: "user_#{i}",  email: "user_#{i}@example.ch")
+    users << user
+  end
+
+  # send lots of messages
+  users.each do |receiver|
+    # async messaging
+    spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
+
+    # synchronous messaging
+    # receiver.channel.send("SYNC -- From: #{receiver.to_s} - with channel")
+  end
+
+  # close user channels
+  users.each do |receiver|
+    # synchronous channel closing
+    receiver.channel.close
+
+    # close asynchronously to allow messages to be delivered
+    # spawn receiver.channel.close
+  end
+
+  # wait for all channels to close before allowing main to terminate
+  Fiber.yield
+
+  # loop do
+  #   break if users.all?{ |u| u.channel.closed? } # are all channels are closed?
+  #   Fiber.yield
+  # end
+end
+```
+
+Run the following with:
+`crystal src/simple_channels/main_stress.cr`
+
+With the simple `Fiber.yield` we get a lot of exceptions since the channels then we wait for the async messages to be delivered.
+
+To solve this simply comment out the synchronous channel closing and use asycn closing, i.e.:
+```crystal
+# close user channels
+users.each do |receiver|
+  # synchronous channel closing
+  # receiver.channel.close
+
+  # close asynchronously to allow messages to be delivered
+  spawn receiver.channel.close
+end
+```
+
+Unfortunately, if messages are sent asynchronously - then `Fiber.yield` with enough objects - perhaps only 80-90% of the messages have time to get handled before `main` ends. To see this change the sending to asynchronous messaging with:
+```crystal
+# send lots of messages
+users.each do |receiver|
+  # async messaging
+  # spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
+
+  # synchronous messaging
+  receiver.channel.send("SYNC -- From: #{receiver.to_s} - with channel")
+end
+```
+
+To fix this we need to actually wait and test that all channels are closed.  Change the wait code to:
+```crystal
+# wait for all channels to close before allowing main to terminate
+# Fiber.yield
+
+loop do
+  break if users.all?{ |u| u.channel.closed? } # are all channels are closed?
+  Fiber.yield
+end
+```
+Now all the messages are delivered again.
+
+Interestingly we get errors if we enable both synchronous and asynchronous message sending, i.e.
+
+```crystal
+# send lots of messages
+users.each do |receiver|
+  # async messaging
+  spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
+
+  # synchronous messaging
+  receiver.channel.send("SYNC -- From: #{receiver.to_s} - with channel")
+end
+```
+
+In this case: I suggest the following code to use `user`:
+```
+# src/simple_channels/main_stress.cr
+require "./user"
+
+module MainStress
+
+  # make a large number of users
+  users  = [] of User
+  status = Channel(Nil).new
+  1000.times do |i|
+    user = User.new(name: "user_#{i}",  email: "user_#{i}@example.ch")
+    users << user
+  end
+
+  # send lots of messages
+  users.each do |receiver|
+    # async messaging
+    spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
+
+    # synchronous messaging
+    # receiver.channel.send("SYNC -- From: #{receiver.to_s} - with channel")
+  end
+
+  # close user channels
+  users.each do |receiver|
+    # close asynchronously to allow messages to be delivered
+    spawn receiver.channel.close
+  end
+
+
+  # wait for all channels to close before allowing main to terminate
+  loop do
+    break if users.all?{ |u| u.channel.closed? } # are all channels are closed?
+    Fiber.yield
+  end
+end
+```
+
+=== Call-Back Channels (to Finish)
+
+
+== Parallelism

@@ -20,8 +20,10 @@ I also found the *Crystal Lang Gitter - https://gitter.im/crystal-lang/crystal* 
 
 WARNING: This code does not focus on best practices, security or production ready code.  The code is just good enough to demonstrate what is happening.
 
-== Concurrency
+== Concurrency[concurrency.html]
 
-== Parallelism
+== Channels[channels.html]
 
-== Macros
+== Parallelism[parallelism.html]
+
+== Macros[macros.html]

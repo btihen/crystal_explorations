@@ -1,0 +1,28 @@
+@plambert nope, with a NamedTuple you always have to supply all of the fields. Maybe you should think about using a record instead?
+
+@watzon
+```
+record Foo, id : Int32, name : String? = nil
+
+foo = Foo.new(32)
+# => Foo(id: 32, name: nil)
+```
+@watzon ooh. how is a record different from a struct?
+
+It's just a simplified syntax for creating a Struct with a default initializer
+also defines getters and some ways to copy it
+
+You can also do
+```
+record Foo, name : String, id : Int32 do
+  def do_something
+  end
+end
+```
+
+
+@stnluu_twitter & @randiaz95 - I have two versions of using channels and fibers at: https://github.com/btihen/crystal_channels - It works pretty well. I next want to figure out how to create multiple TCP or windows (one for each user). I realized when doing the chat room - using one thread works well - but compiliing with multiple cores - outputting to one screen gets jumbled again. I'll happily learn more about multiple connections (I assume I need to use TCP sockets) - could I also use OS sockets?
+
+who is doing the output to screen?
+remember yesterday, we discussed about ideally, there's a "room" object that keeps track of all the users, and does the job of broadcasting the message–instead of each user keeping track of all the other users?
+ideally, this "room" object should be the one doing the output to screen, aka only one fiber doing the output.

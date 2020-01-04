@@ -17,7 +17,14 @@ The code is just good enough to demonstrate what is happening.
 
 === Installation
 
-Please see https://crystal-lang.org/install/
+On MacOS - use:
+```bash
+$ brew install crystal
+```
+
+For all other systems see: https://crystal-lang.org/install/
+
+=== Structs & Records
 
 === link:cli.html[Crystal CLI]
 
@@ -35,7 +42,7 @@ Please see https://crystal-lang.org/install/
 
 * Crystal Lang API Docs - https://crystal-lang.org/api/0.32.1/
 * Crystal Lang GitBook - https://crystal-lang.org/reference/guides
-* *Crystal Lang Gitter - https://gitter.im/crystal-lang/crystal* folks instrumental in helping me better undstand and putting these ideas into a context where I could write code that works.
+* *Crystal Lang Gitter - https://gitter.im/crystal-lang/crystal* folks instrumental in helping me better undstand and putting these ideas into a context where I could write code that works (special mention to: @stnluu_twitter, @watzon, @repomaa, @randiaz95)
 
 === Corrections & Improvements
 

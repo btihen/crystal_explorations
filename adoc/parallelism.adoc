@@ -25,12 +25,52 @@ NOTE: Compiling for Parallelism is EXPERIMENTAL
 
 
 To compile and run with parallelism enabled use:
-```
-crystal build -Dpreview_mt code.cr -o code
+```bash
+$ crystal build -Dpreview_mt code.cr -o code
 $ ./code                   # defaul is 4 workers
 $ CRYSTAL_WORKERS=2 ./code # uses two CPUS
 $ CRYSTAL_WORKERS=4 ./code # same as default
 ```
 
+
+
+Jason Thomas (@thedracle):
+```
+The actual server code is as follows:
+
+require "socket"
+require "http/web_socket"
+require "http/server"
+
+VTX_SERVER_ADDR="test.org"
+
+module VTXClientServerCrystal
+  VERSION = "0.1.0"
+  class VTXClientServerCrystal
+    @listen_port : Int32
+    def initialize
+      ENV["LISTEN_PORT"] ||= "7003"
+      @listen_port = ENV["LISTEN_PORT"].to_i
+    end
+    def route_connections
+      ws_handler = HTTP::WebSocketHandler.new {|client|
+        client.on_message {|next_message|
+          puts next_message
+          client.send next_message
+        };
+      };
+      server = HTTP::Server.new([ws_handler]);
+      context = OpenSSL::SSL::Context::Server.new
+      context.certificate_chain = "./cert/server.cert"
+      context.private_key = "./cert/server.key"
+      address = server.bind_tls Socket::IPAddress.new("127.0.0.1", @listen_port), context
+      server.listen
+    end
+  end
+
+  server = VTXClientServerCrystal.new
+  server.route_connections
+end
+```
 
 *link:index.html[Start Page]*

@@ -1,5 +1,5 @@
 = Crystal Lang Explorations
-Bill Tihen - using Crystal 0.32.1
+Bill Tihen (Crystal 0.32.1)
 Version 0.0.1
 :sectnums:
 :toc:
@@ -27,53 +27,7 @@ WARNING: This code does not focus on best practices, security or production read
 
 Please see https://crystal-lang.org/install/
 
-== Using Crystal CLI
-
-* get cli help
-```
-crystal -h
-```
-
-* generate a new app:
-```
-crystal init app project_name
-cd project_name
-```
-
-* compile and run (while developing):
-```
-crystal run src/code.cr
-```
-
-* compile to executable and run:
-```
-crystal build src/file.cr
-./file
-```
-
-* compile and optimize build (for release into the wild):
-```
-crystal build --release src/file.cr -o new_name
-./new_name
-```
-
-* compile with Parallelism enabled (experimental) - https://crystal-lang.org/2019/09/06/parallelism-in-crystal.html
-```
-crystal build -Dpreview_mt code.cr -o code
-$ ./code                   # defaul is 4 workers
-$ CRYSTAL_WORKERS=2 ./code # uses two CPUS
-$ CRYSTAL_WORKERS=4 ./code # same as default
-```
-
-* compile and run (all) specs:
-```
-crystal spec
-```
-
-* build docs from code comments
-```
-crystal docs
-```
+== link:cli.html[Crystal CLI]
 
 == link:concurrency.html[Concurrency]
 

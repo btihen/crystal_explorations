@@ -1,5 +1,5 @@
 = Crystal Lang Channel Callbacks
-Bill Tihen - using Crystal 0.32.1
+Bill Tihen (Crystal 0.32.1)
 Version 0.0.1
 :sectnums:
 :toc:

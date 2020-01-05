@@ -496,11 +496,9 @@ ideally, this "room" object should be the one doing the output to screen, aka on
 <p>from @repomaa</p>
 </div>
 <div class="listingblock">
+<div class="title">src/channel_callbacks/user.cr</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="crystal">.src/channel_callbacks/user.cr
-[source]
-----
-class User
+<pre class="prettyprint highlight"><code data-lang="crystal">class User
   getter channel : Channel(String)
   private getter name : String, email : String, status : Channel(Nil)
 
@@ -524,13 +522,13 @@ class User
       status.send(nil)   # loop ends when channels closes - send close status
     end
   end
-end
-----
-
-.src/channel_callbacks/main.cr
-[source]
-----
-require "./user"
+end</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">src/channel_callbacks/main.cr</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="crystal">require "./user"
 
 # create users
 status = Channel(Nil).new
@@ -548,12 +546,15 @@ puts "REAL-TIME - DONE"
 user_1.channel.close
 user_2.channel.close
 
-2.times { status.receive }
-----
-
-Run with:
-```bash
-$ crystal src/channel_callbacks/main.cr</code></pre>
+2.times { status.receive }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Run with:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/channel_callbacks/main.cr</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -617,7 +618,7 @@ end</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-05 19:34:47 +0100
+Last updated 2020-01-05 20:55:49 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">

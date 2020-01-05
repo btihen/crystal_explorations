@@ -36,7 +36,6 @@ ideally, this "room" object should be the one doing the output to screen, aka on
 
 from @repomaa
 
-```
 .src/channel_callbacks/user.cr
 [source]
 ----

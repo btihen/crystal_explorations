@@ -1,4 +1,4 @@
-# src/channel_callbacks/main_stress.cr
+# src/channels_buffered/main_stress.cr
 require "./user"
 
 module MainStress
@@ -22,9 +22,10 @@ module MainStress
   end
 
   # # send lots of messages - async (for some reason async needs to be first)
-  # users.each do |receiver|
-  #   spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
-  # end
+  users.each do |receiver|
+    spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
+    receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
+  end
 
   # close asynchronously to allow messages to be delivered
   users.each do |receiver|

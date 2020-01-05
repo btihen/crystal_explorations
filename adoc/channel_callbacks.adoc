@@ -151,4 +151,7 @@ Run with:
 $ crystal src/channel_callbacks/main_stress.cr
 ```
 
+@stnluu_twitter
+Fix for the stress testing is buffering when switching back and forth between sync and async.
+
 *link:index.html[Start Page]*

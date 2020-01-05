@@ -36,6 +36,8 @@ TODO: review, augment and adapt content using: https://blog.golang.org/pipelines
 
 === link:channel_callbacks.html[Channel Callbacks]
 
+=== link:channel_buffers.html[Channel Buffers]
+
 === Parallelism
 
 === Macros

@@ -5,7 +5,7 @@ class User
   private getter name : String, email : String, status : Channel(User)
 
   def initialize(@name, @email, @status)
-    @channel = Channel(String).new(2)
+    @channel = Channel(String).new(3)
     listen_for_messages
   end
 

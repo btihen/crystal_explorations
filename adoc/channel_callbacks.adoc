@@ -146,4 +146,9 @@ module MainStress
 end
 ----
 
+Run with:
+```bash
+$ crystal src/channel_callbacks/main_stress.cr
+```
+
 *link:index.html[Start Page]*

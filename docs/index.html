@@ -472,8 +472,20 @@ The code is just good enough to demonstrate what is happening.
 <div class="sect2">
 <h3 id="_installation">Installation</h3>
 <div class="paragraph">
-<p>Please see <a href="https://crystal-lang.org/install/" class="bare">https://crystal-lang.org/install/</a></p>
+<p>On MacOS - use:</p>
 </div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="bash">$ brew install crystal</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For all other systems see: <a href="https://crystal-lang.org/install/" class="bare">https://crystal-lang.org/install/</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_structs_records"><a href="structs_n_records.html">Structs &amp; Records</a></h3>
+
 </div>
 <div class="sect2">
 <h3 id="_crystal_cli"><a href="cli.html">Crystal CLI</a></h3>
@@ -481,14 +493,16 @@ The code is just good enough to demonstrate what is happening.
 </div>
 <div class="sect2">
 <h3 id="_concurrency"><a href="concurrency.html">Concurrency</a></h3>
-
+<div class="paragraph">
+<p>TODO: review, augment and adapt content using: <a href="https://blog.golang.org/pipelines" class="bare">https://blog.golang.org/pipelines</a></p>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_channels"><a href="channels.html">Channels</a></h3>
 
 </div>
 <div class="sect2">
-<h3 id="_channel_callbacks">Channel Callbacks</h3>
+<h3 id="_channel_callbacks"><a href="channel_callbacks.html">Channel Callbacks</a></h3>
 
 </div>
 <div class="sect2">
@@ -510,9 +524,17 @@ The code is just good enough to demonstrate what is happening.
 <p>Crystal Lang GitBook - <a href="https://crystal-lang.org/reference/guides" class="bare">https://crystal-lang.org/reference/guides</a></p>
 </li>
 <li>
-<p><strong>Crystal Lang Gitter - <a href="https://gitter.im/crystal-lang/crystal" class="bare">https://gitter.im/crystal-lang/crystal</a></strong> folks instrumental in helping me better undstand and putting these ideas into a context where I could write code that works.</p>
+<p><strong>Crystal Lang Gitter - <a href="https://gitter.im/crystal-lang/crystal" class="bare">https://gitter.im/crystal-lang/crystal</a></strong> folks instrumental in helping me better undstand and putting these ideas into a context where I could write code that works (special mention to: @stnluu_twitter, @watzon, @repomaa, @randiaz95)</p>
 </li>
 </ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_generating_the_docs">Generating the Docs</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="bash">asciidoctor -D docs adoc/*</code></pre>
+</div>
 </div>
 </div>
 <div class="sect2">
@@ -533,7 +555,7 @@ The code is just good enough to demonstrate what is happening.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-04 22:26:17 +0100
+Last updated 2020-01-05 20:53:52 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">

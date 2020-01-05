@@ -485,6 +485,131 @@ The code is just good enough to demonstrate what is happening.
 <p>Ideally, we will close the channels when we are done and we can even use that info to know if we can end our <strong>main thread</strong> (program).</p>
 </div>
 <div class="paragraph">
+<p>@stnluu_twitter &amp; @randiaz95 - I have two versions of using channels and fibers at: <a href="https://github.com/btihen/crystal_channels" class="bare">https://github.com/btihen/crystal_channels</a> - It works pretty well. I next want to figure out how to create multiple TCP or windows (one for each user). I realized when doing the chat room - using one thread works well - but compiliing with multiple cores - outputting to one screen gets jumbled again. I&#8217;ll happily learn more about multiple connections (I assume I need to use TCP sockets) - could I also use OS sockets?</p>
+</div>
+<div class="paragraph">
+<p>who is doing the output to screen?
+remember yesterday, we discussed about ideally, there&#8217;s a "room" object that keeps track of all the users, and does the job of broadcasting the message–instead of each user keeping track of all the other users?
+ideally, this "room" object should be the one doing the output to screen, aka only one fiber doing the output.</p>
+</div>
+<div class="paragraph">
+<p>from @repomaa</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="crystal">.src/channel_callbacks/user.cr
+[source]
+----
+class User
+  getter channel : Channel(String)
+  private getter name : String, email : String, status : Channel(Nil)
+
+  def initialize(@name, @email, @status)
+    @channel = Channel(String).new
+    listen_for_messages
+  end
+
+  def to_s
+    "#{name} &lt;#{email}&gt;"
+  end
+
+  private def listen_for_messages
+    spawn do
+      loop do
+        message = channel.receive?
+        break     if message.nil?
+
+        puts "To: #{to_s} -- #{message}"
+      end
+      status.send(nil)   # loop ends when channels closes - send close status
+    end
+  end
+end
+----
+
+.src/channel_callbacks/main.cr
+[source]
+----
+require "./user"
+
+# create users
+status = Channel(Nil).new
+user_1 = User.new(name: "first",  email: "first@example.ch", status: status)
+user_2 = User.new(name: "second", email: "second@example.ch", status: status)
+
+puts "REAL-TIME - START"
+spawn user_1.channel.send("ASYNC sent 1st!")
+user_1.channel.send("REAL-TIME sent 2nd!")
+spawn user_1.channel.send("ASYNC sent 3th!")
+user_2.channel.send("REAL-TIME sent 4th!")
+spawn user_2.channel.send("ASYNC sent 5th!")
+user_1.channel.send("REAL-TIME sent 6th!")
+puts "REAL-TIME - DONE"
+user_1.channel.close
+user_2.channel.close
+
+2.times { status.receive }
+----
+
+Run with:
+```bash
+$ crystal src/channel_callbacks/main.cr</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we can wait for all channels to close.</p>
+</div>
+<div class="paragraph">
+<p>Below shows code that allows us to track users 'registered' in the <code>users</code> array (we remove users when they close their channel)</p>
+</div>
+<div class="listingblock">
+<div class="title">src/channel_callbacks/main_stress.cr</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="crystal">require "./user"
+
+module MainStress
+
+  # make callback status channel
+  status = Channel(User).new
+
+  # make a large number of users
+  users  = [] of User
+
+  10000.times do |i|
+    user = User.new(name: "user_#{i}", email: "user_#{i}@example.ch", status: status)
+    users &lt;&lt; user
+  end
+
+  # send lots of messages - async (for some reason async needs to be first)
+  users.each do |receiver|
+    spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
+  end
+
+  # send lots of messages - async (for some reason async needs to be first)
+  users.each do |receiver|
+    spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
+  end
+
+  # close asynchronously to allow messages to be delivered
+  users.each do |receiver|
+    spawn receiver.channel.close
+  end
+
+  # wait for all channels close - which 'unregisters' a user from `users`
+  #######
+  # we can also do this and 'unscribe' users when they close their channels
+  # ideally this would also run within a listener (and not in a loop)
+  while users.size &gt; 0
+    user   = status.receive?
+    break if user.nil?
+
+    users.delete(user)
+    puts "CLOSED: #{user.to_s}"
+  end
+end</code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p><strong><a href="index.html">Start Page</a></strong></p>
 </div>
 </div>
@@ -492,7 +617,7 @@ The code is just good enough to demonstrate what is happening.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-04 22:25:42 +0100
+Last updated 2020-01-05 19:34:47 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">

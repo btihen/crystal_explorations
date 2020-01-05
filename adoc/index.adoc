@@ -24,15 +24,17 @@ $ brew install crystal
 
 For all other systems see: https://crystal-lang.org/install/
 
-=== Structs & Records
+=== link:structs_n_records.html[Structs & Records]
 
 === link:cli.html[Crystal CLI]
 
 === link:concurrency.html[Concurrency]
 
+TODO: review, augment and adapt content using: https://blog.golang.org/pipelines
+
 === link:channels.html[Channels]
 
-=== Channel Callbacks
+=== link:channel_callbacks.html[Channel Callbacks]
 
 === Parallelism
 
@@ -43,6 +45,13 @@ For all other systems see: https://crystal-lang.org/install/
 * Crystal Lang API Docs - https://crystal-lang.org/api/0.32.1/
 * Crystal Lang GitBook - https://crystal-lang.org/reference/guides
 * *Crystal Lang Gitter - https://gitter.im/crystal-lang/crystal* folks instrumental in helping me better undstand and putting these ideas into a context where I could write code that works (special mention to: @stnluu_twitter, @watzon, @repomaa, @randiaz95)
+
+=== Generating the Docs
+
+```bash
+asciidoctor -D docs adoc/*
+```
+
 
 === Corrections & Improvements
 

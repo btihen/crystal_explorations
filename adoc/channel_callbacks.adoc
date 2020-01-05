@@ -37,6 +37,9 @@ ideally, this "room" object should be the one doing the output to screen, aka on
 from @repomaa
 
 ```
+.src/channel_callbacks/user.cr
+[source]
+----
 class User
   getter channel : Channel(String)
   private getter name : String, email : String, status : Channel(Nil)
@@ -58,10 +61,16 @@ class User
 
         puts "To: #{to_s} -- #{message}"
       end
-      status.send(nil)  
+      status.send(nil)   # loop ends when channels closes - send close status
     end
   end
 end
+----
+
+.src/channel_callbacks/main.cr
+[source]
+----
+require "./user"
 
 # create users
 status = Channel(Nil).new
@@ -71,7 +80,7 @@ user_2 = User.new(name: "second", email: "second@example.ch", status: status)
 puts "REAL-TIME - START"
 spawn user_1.channel.send("ASYNC sent 1st!")
 user_1.channel.send("REAL-TIME sent 2nd!")
-user_1.channel.send("REAL-TIME sent 3th!")
+spawn user_1.channel.send("ASYNC sent 3th!")
 user_2.channel.send("REAL-TIME sent 4th!")
 spawn user_2.channel.send("ASYNC sent 5th!")
 user_1.channel.send("REAL-TIME sent 6th!")
@@ -80,7 +89,62 @@ user_1.channel.close
 user_2.channel.close
 
 2.times { status.receive }
+----
+
+Run with:
+```bash
+$ crystal src/channel_callbacks/main.cr
 ```
 
+Now we can wait for all channels to close.
+
+Below shows code that allows us to track users 'registered' in the `users` array (we remove users when they close their channel)
+
+.src/channel_callbacks/main_stress.cr
+[source]
+----
+require "./user"
+
+module MainStress
+
+  # make callback status channel
+  status = Channel(User).new
+
+  # make a large number of users
+  users  = [] of User
+
+  10000.times do |i|
+    user = User.new(name: "user_#{i}", email: "user_#{i}@example.ch", status: status)
+    users << user
+  end
+
+  # send lots of messages - async (for some reason async needs to be first)
+  users.each do |receiver|
+    spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
+  end
+
+  # send lots of messages - async (for some reason async needs to be first)
+  users.each do |receiver|
+    spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
+  end
+
+  # close asynchronously to allow messages to be delivered
+  users.each do |receiver|
+    spawn receiver.channel.close
+  end
+
+  # wait for all channels close - which 'unregisters' a user from `users`
+  #######
+  # we can also do this and 'unscribe' users when they close their channels
+  # ideally this would also run within a listener (and not in a loop)
+  while users.size > 0
+    user   = status.receive?
+    break if user.nil?
+
+    users.delete(user)
+    puts "CLOSED: #{user.to_s}"
+  end
+end
+----
 
 *link:index.html[Start Page]*

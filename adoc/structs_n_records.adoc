@@ -14,21 +14,7 @@ Version 0.0.1
 
 *link:index.html[Start Page]*
 
-== Structs
-
-Structs (& Records) are basically classes, but:
-* they are immutable (once created they aren't changed)
-* they are passed by VALUE not by REFERENCE (this means the data is COPIED)
-
-.NOTE:
-****
-* Immutability makes Structs (& Records) safe to pass between Fibers via Channels.
-* Given structs are COPIED - very large structures may slow-down your code and use a lot of memory.
-****
-
-I like to think of these as flexible immutable data types - with very few if any methods.  These are a great way to pass data between classes (safely - async or sync).
-
-To demonstrate Structs and Records - lets assume we have a User class that can receive messages posted to it.  We will create an immutable struct for passing the messages.
+To demonstrate Structs and Records - lets assume we have a `User` class that can receive messages posted to it.
 
 .src/structs_n_records/user.cr
 [source,linenums]
@@ -51,23 +37,114 @@ class User
 end
 ----
 
-Here is the simplest possible Struct (that might be used to send messages to users).
+== Structs & Records - Intro
+
+I like to think of these as flexible immutable data types - with very few if any methods.
+
+Structs (& Records) are basically classes, but:
+* they are immutable _(once created the values don't change)_
+* they are passed by **value** NOT by REFERENCE (this means the data is COPIED)
+
+Good uses include:
+* pass immutable data between Fibers
+* build *Value Objects* (like representing money which has a value and a currency).
+
+.NOTE:
+****
+* Immutability makes Structs (& Records) safe to pass between Fibers via Channels.
+* Given structs are COPIED - very large structures may slow-down your code and use a lot of memory.
+****
+
+.TODO
+****
+Check if Crystal structs have built in value comparisons or if those need to be added to build a proper *Value Object*
+****
+
+== Structs
+
+Structs are immutable classes focused on presenting / passing data.
+
+=== Data Structs (no methods)
+
+The simplest Data Struct contains a `getter` and an `initialize` method - as seen below:
+
+```
+struct Message
+  getter sender, receiver, topic, text
+
+  def initialize(@sender  : User, @text : String, @receiver : User? = nil, @topic : String? = nil)
+    @text = text.strip
+  end
+end
+```
+
+Below is an example of how the struct is used.
 
 .src/structs_n_records/message_struct_simple.cr
 [source,linenums]
 ----
 require "./user"
 
-struct MessageStruct
-  getter sender : User, receiver : User?, topic : String, text : String
+struct Message
+  getter sender, receiver, topic, text
 
   def initialize(@sender  : User, @text : String, @receiver : User? = nil, @topic : String? = nil)
     @text = text.strip
   end
 end
+
+user_1 = User.new(name: "user_1", email: "user_1@example.com")
+user_2 = User.new(name: "user_2", email: "user_2@example.com")
+
+mesg_1 = Message.new(sender: user_2, text: "Hi")
+mesg_2 = Message.new(sender: user_1, text: "Hoi", topic: "Greet")
+mesg_3 = Message.new(sender: user_1, text: "Hoi", topic: "Greet", receiver: user_2)
+
+user_1.post_message(mesg_1)
+user_2.post_message(mesg_2)
+user_2.post_message(mesg_3)
+
+# # UserUnpackPost: A User Decorator responsible to unpack User Messages Posted
+# class UserUnpackPost
+#   def initialize(@user : User)
+#   end
+#
+#   def post_message(message : Message)
+#     text     = message.text
+#     topic    = message.topic
+#     sender   = message.sender
+#     receiver = message.receiver
+#     output = [] of String
+#     output << "-" * 30
+#     output << "From: #{sender.to_s}"
+#     output << "To: #{receiver.to_s}"       unless receiver.nil?
+#     output << "Topic: #{topic.to_s.strip}" unless topic.nil?
+#     output << text.strip
+#     output << "-" * 30
+#     puts output.join("\n")
+#   end
+# end
+#
+# UserUnpackPost.new(user_1).post_message(mesg_1)
+# UserUnpackPost.new(user_2).post_message(mesg_2)
+# UserUnpackPost.new(user_2).post_message(mesg_3)
 ----
 
-Structs can also have a method (generally, I like to create `to_s` methods) - in this case the struct would look like:
+Run this using:
+```bash
+$ crystal src/structs_n_records/message_struct_simple.cr
+```
+
+This works - but the messages print in a pretty unsatisfactory manner.  It's not great design if *User* class needs to know the internal structure of *Message* to print.
+
+One solution would be use a *Decorator/Wrapper* class which knows the details of the *Message* internals.  Uncomment the decorator code to see the effect (but ideally *Message* should not many ANY other part of code know its implementation details).  The next section shows a much better approach.
+
+
+=== Struct with Methods - (responsible for its own internal structure)
+
+Data Structs work well for the purpose of passing immutable data as seen above, but it is also convenient if other consuming classes don't need to know the internals of the struct.
+
+To fix this `structs` can also define *methods* -- they should be at a minimum and should not attempt to mutate the state.  Below is an example that adds the `to_s` to allow the `User` class to easily consume / print the Message (in a much cleaner way where *Message* class knows how to present its data).
 
 .src/structs_n_records/message_struct.cr
 [source,linenums]
@@ -75,19 +152,17 @@ Structs can also have a method (generally, I like to create `to_s` methods) - in
 require "./user"
 
 struct Message
-  getter sender : User, receiver : User?, topic : String, text : String
+  getter sender, receiver, topic, text
 
-  def initialize(@sender  : User, @text : String, @receiver : User? = nil, @topic : String = "")
-    @text = text.strip
-    @topic = topic.strip
+  def initialize(@sender  : User, @text : String, @receiver : User? = nil, @topic : String? = nil)
   end
 
   def to_s
     output = [] of String
     output << "-" * 30
     output << "From: #{sender.to_s}"
-    output << "To: #{receiver.to_s}"  unless receiver.nil?
-    output << "Topic: #{topic}"       unless topic == ""
+    output << "To: #{receiver.to_s}"       unless receiver.nil?
+    output << "Topic: #{topic.to_s.strip}" unless topic.nil?
     output << text.strip
     output << "-" * 30
     output.join("\n")
@@ -112,17 +187,54 @@ Run this using:
 $ crystal src/structs_n_records/message_struct.cr
 ```
 
-## Records
+In this way we can add (possibly remove) data and features from the *Message* all transparently to the *User*
 
-Records are a simplified way to create a Struct _(they have default initializer and getters)._
+== Records
 
-Thus the simplest Record definition looks like:
+Fundamentally *Records* are *Structs* with the _initializer_ and _getters_ automatically defined for your.
+
+=== Records (no methods)
+
+Thus the simplest Record definition for a Message would be:
 
 ```
 record(Message, sender : User, text : String, receiver : User? = nil, topic : String? = nil)
-# or
+
+# or without the parens
+
 record Message, sender : User, text : String, receiver : User? = nil, topic : String? = nil
 ```
+
+The following code demostrates how to use records.
+
+.src/structs_n_records/simple_record.cr
+[source,linenums]
+----
+require "./user"
+
+record(Message, sender : User, text : String, receiver : User? = nil, topic : String? = nil)
+
+user_1 = User.new(name: "user_1", email: "user_1@example.com")
+user_2 = User.new(name: "user_2", email: "user_2@example.com")
+
+mesg_1 = Message.new(sender: user_2, text: "Hi")
+mesg_2 = Message.new(sender: user_1, text: "Hoi", topic: "Greet")
+mesg_3 = Message.new(sender: user_1, text: "Hoi", topic: "Greet", receiver: user_2)
+
+user_1.post_message(mesg_1)
+user_2.post_message(mesg_2)
+user_2.post_message(mesg_3)
+----
+
+Run this using:
+
+```bash
+$ crystal src/structs_n_records/simple_record.cr
+```
+
+This of course has the same limitation as a Struct without a `to_s` methods.
+
+=== Records (with methods)
 
 Assuming you want a custom method then the record looks like:
 
@@ -163,4 +275,6 @@ Run this using:
 $ crystal src/structs_n_records/message_record.cr
 ```
 
-As you can see there is fundamentally no difference between Structs and Records - just simplified setup.
+As you can see in many cases using a record has all the power of a struct and removes boilerplate code.
+
+*link:index.html[Start Page]*

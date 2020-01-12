@@ -14,15 +14,13 @@ Version 0.0.1
 
 *link:index.html[Start Page]*
 
-== Concurrency
+== Introduction - Spawn Fibers
 
 By default when crystal code launches a *main thread* is created for the running code, a separate thread is created for the *garbage collector*, and an *Event Loop* to handle IO waits - allowing the main thread to continue while waiting for slow IO calls to finish.
 
-Concurrency happens by `spawn`ing `fiber`s _(light-weight sub-threads within the *main thread*)._  These `fiber`s are scheduled to run within the *main thread* on it's CPU.  Concurrency is a form of *multi-tasking* - quickly switching between tasks on the *main thead.*
+Concurrency happens by **spawning fibers** _(light-weight sub-threads within the *main thread*)._  **Fibers** are scheduled to run within the *main thread* on it's CPU.  Concurrency is a form of *multi-tasking* - quickly switching between tasks on the *main thead*
 
 Parallelism - _with the appropriate compiler switches_ - allows processes to happen simultaneously on separate CPUs.
-
-=== Spawning Fibers Intro
 
 New Fibers are created using `spawn`.
 
@@ -30,7 +28,7 @@ There two main way to `spawn` threads - we will need both:
 - using the block notation
 - using the method call notation
 
-=== Spawn Block and Fiber Execution
+== Spawn Block
 
 A spawn block looks like:
 
@@ -55,7 +53,7 @@ NOTE: We don't see the text *within spawn*
 
 In order to get the main thread to let the Fiber run before ending we need to uncomment the `Fiber.yield` and run again - this tells the main thread to process the fibers on the *main thread* - later we will see there are other actions that trigger the *main thread* to yield to the Fibers.
 
-=== Spawn Block _(Passes Values when Fiber EXECUTES)_
+=== Passing Values when Fiber EXECUTES
 
 Spawn block - uses the **value at the time when the Fiber is executed** - which can lead to unexpected results. Try the following code:
 
@@ -82,7 +80,7 @@ Run with:
 $ crystal src/concurrency/spawn_block_unexpected.cr
 ```
 
-=== Spawn Block with Procs _(Passes Values when Fiber SPAWNED)_
+=== Passes Values when Fiber SPAWNS
 
 Because i = 1 at the time when the fibers execute '1' is printed twice - this is probably not desired in this case.  The solution is to use `Proc`
 
@@ -121,7 +119,7 @@ $ crystal src/concurrency/spawn_proc_block.cr
 
 NOTE: now all works well - but lots of code for 2 simple `puts` statements.
 
-=== Spawn Method Call _(simple passing values at spawn)_
+== Spawn Method (Passing Values when Fiber Spawn)
 
 A *much nicer* way to pass the value at the time of call -- not at the time of execution is to use the `spawn` call:
 

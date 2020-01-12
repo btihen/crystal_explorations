@@ -2,19 +2,17 @@
 require "./user"
 
 struct Message
-  getter sender : User, receiver : User?, topic : String, text : String
+  getter sender, receiver, topic, text
 
-  def initialize(@sender  : User, @text : String, @receiver : User? = nil, @topic : String = "")
-    @text = text.strip
-    @topic = topic.strip
+  def initialize(@sender  : User, @text : String, @receiver : User? = nil, @topic : String? = nil)
   end
 
   def to_s
     output = [] of String
     output << "-" * 30
     output << "From: #{sender.to_s}"
-    output << "To: #{receiver.to_s}"  unless receiver.nil?
-    output << "Topic: #{topic}"       unless topic == ""
+    output << "To: #{receiver.to_s}"       unless receiver.nil?
+    output << "Topic: #{topic.to_s.strip}" unless topic.nil?
     output << text.strip
     output << "-" * 30
     output.join("\n")

@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
 <meta name="author" content="Bill Tihen (Crystal 0.32.1)">
-<title>Crystal Lang Explorations&#8201;&#8212;&#8201;Structs and Records</title>
+<title>Crystal Lang Explorations&#8201;&#8212;&#8201;Channel Notifiers</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -439,7 +439,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
-<h1>Crystal Lang Explorations&#8201;&#8212;&#8201;Structs and Records</h1>
+<h1>Crystal Lang Explorations&#8201;&#8212;&#8201;Channel Notifiers</h1>
 <div class="details">
 <span id="author" class="author">Bill Tihen (Crystal 0.32.1)</span><br>
 <span id="revdate">Version 0.0.1</span>
@@ -447,19 +447,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toc" class="toc">
 <div id="toctitle">Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_structs_records_intro">1. Structs &amp; Records - Intro</a></li>
-<li><a href="#_structs">2. Structs</a>
-<ul class="sectlevel2">
-<li><a href="#_data_structs_no_methods">2.1. Data Structs (no methods)</a></li>
-<li><a href="#_struct_with_methods_responsible_for_its_own_internal_structure">2.2. Struct with Methods - (responsible for its own internal structure)</a></li>
-</ul>
-</li>
-<li><a href="#_records">3. Records</a>
-<ul class="sectlevel2">
-<li><a href="#_records_no_methods">3.1. Records (no methods)</a></li>
-<li><a href="#_records_with_methods">3.2. Records (with methods)</a></li>
-</ul>
-</li>
+<li><a href="#_channel_notifiers">1. Channel Notifiers</a></li>
 </ul>
 </div>
 </div>
@@ -469,323 +457,20 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="paragraph">
 <p><strong><a href="index.html">Start Page</a></strong></p>
 </div>
-<div class="paragraph">
-<p>To demonstrate Structs and Records - lets assume we have a <code>User</code> class that can receive messages posted to it.</p>
-</div>
-<div class="listingblock">
-<div class="title">src/structs_n_records/user.cr</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="linenums">require "./message_record"
-
-class User
-  private getter name : String, email : String
-
-  def initialize(@name, @email)
-  end
-
-  def to_s
-    "#{name} &lt;#{email}&gt;"
-  end
-
-  def post_message(message : Message)
-    puts message.to_s
-  end
-end</code></pre>
-</div>
-</div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_structs_records_intro">1. Structs &amp; Records - Intro</h2>
+<h2 id="_channel_notifiers">1. Channel Notifiers</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>I like to think of these as flexible immutable data types - with very few if any methods.</p>
-</div>
-<div class="paragraph">
-<p>Structs (&amp; Records) are basically classes, but:
-* they are immutable <em>(once created the values don&#8217;t change)</em>
-* they are passed by <strong>value</strong> NOT by REFERENCE (this means the data is COPIED)</p>
-</div>
-<div class="paragraph">
-<p>Good uses include:
-* pass immutable data between Fibers
-* build <strong>Value Objects</strong> (like representing money which has a value and a currency).</p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="title">NOTE:</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Immutability makes Structs (&amp; Records) safe to pass between Fibers via Channels.</p>
-</li>
-<li>
-<p>Given structs are COPIED - very large structures may slow-down your code and use a lot of memory.</p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_structs">2. Structs</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Structs are immutable classes focused on presenting / passing data.</p>
-</div>
-<div class="sect2">
-<h3 id="_data_structs_no_methods">2.1. Data Structs (no methods)</h3>
-<div class="paragraph">
-<p>The simplest Data Struct contains a <code>getter</code> and an <code>initialize</code> method - as seen below:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="crystal">struct Message
-  getter sender, receiver, topic, text
-
-  def initialize(@sender  : User, @text : String, @receiver : User? = nil, @topic : String? = nil)
-    @text = text.strip
-  end
-end</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Below is an example of how the struct is used.</p>
-</div>
-<div class="listingblock">
-<div class="title">src/structs_n_records/message_struct_simple.cr</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="linenums">require "./user"
-
-struct Message
-  getter sender, receiver, topic, text
-
-  def initialize(@sender  : User, @text : String, @receiver : User? = nil, @topic : String? = nil)
-    @text = text.strip
-  end
-end
-
-user_1 = User.new(name: "user_1", email: "user_1@example.com")
-user_2 = User.new(name: "user_2", email: "user_2@example.com")
-
-mesg_1 = Message.new(sender: user_2, text: "Hi")
-mesg_2 = Message.new(sender: user_1, text: "Hoi", topic: "Greet")
-mesg_3 = Message.new(sender: user_1, text: "Hoi", topic: "Greet", receiver: user_2)
-
-user_1.post_message(mesg_1)
-user_2.post_message(mesg_2)
-user_2.post_message(mesg_3)
-
-# # UserUnpackPost: A User Decorator responsible to unpack User Messages Posted
-# class UserUnpackPost
-#   def initialize(@user : User)
-#   end
-#
-#   def post_message(message : Message)
-#     text     = message.text
-#     topic    = message.topic
-#     sender   = message.sender
-#     receiver = message.receiver
-#     output = [] of String
-#     output &lt;&lt; "-" * 30
-#     output &lt;&lt; "From: #{sender.to_s}"
-#     output &lt;&lt; "To: #{receiver.to_s}"       unless receiver.nil?
-#     output &lt;&lt; "Topic: #{topic.to_s.strip}" unless topic.nil?
-#     output &lt;&lt; text.strip
-#     output &lt;&lt; "-" * 30
-#     puts output.join("\n")
-#   end
-# end
-#
-# UserUnpackPost.new(user_1).post_message(mesg_1)
-# UserUnpackPost.new(user_2).post_message(mesg_2)
-# UserUnpackPost.new(user_2).post_message(mesg_3)</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Run this using:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/structs_n_records/message_struct_simple.cr</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This works - but the messages print in a pretty unsatisfactory manner.  It&#8217;s not great design if <strong>User</strong> class needs to know the internal structure of <strong>Message</strong> to print.</p>
-</div>
-<div class="paragraph">
-<p>One solution would be use a <strong>Decorator/Wrapper</strong> class which knows the details of the <strong>Message</strong> internals.  Uncomment the decorator code to see the effect (but ideally <strong>Message</strong> should not many ANY other part of code know its implementation details).  The next section shows a much better approach.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_struct_with_methods_responsible_for_its_own_internal_structure">2.2. Struct with Methods - (responsible for its own internal structure)</h3>
-<div class="paragraph">
-<p>Data Structs work well for the purpose of passing immutable data as seen above, but it is also convenient if other consuming classes don&#8217;t need to know the internals of the struct.</p>
-</div>
-<div class="paragraph">
-<p>To fix this <code>structs</code> can also define <strong>methods</strong>&#8201;&#8212;&#8201;they should be at a minimum and should not attempt to mutate the state.  Below is an example that adds the <code>to_s</code> to allow the <code>User</code> class to easily consume / print the Message (in a much cleaner way where <strong>Message</strong> class knows how to present its data).</p>
-</div>
-<div class="listingblock">
-<div class="title">src/structs_n_records/message_struct.cr</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="linenums">require "./user"
-
-struct Message
-  getter sender, receiver, topic, text
-
-  def initialize(@sender  : User, @text : String, @receiver : User? = nil, @topic : String? = nil)
-  end
-
-  def to_s
-    output = [] of String
-    output &lt;&lt; "-" * 30
-    output &lt;&lt; "From: #{sender.to_s}"
-    output &lt;&lt; "To: #{receiver.to_s}"       unless receiver.nil?
-    output &lt;&lt; "Topic: #{topic.to_s.strip}" unless topic.nil?
-    output &lt;&lt; text.strip
-    output &lt;&lt; "-" * 30
-    output.join("\n")
-  end
-end
-
-user_1 = User.new(name: "user_1", email: "user_1@example.com")
-user_2 = User.new(name: "user_2", email: "user_2@example.com")
-
-mesg_1 = Message.new(sender: user_2, text: "Hi")
-mesg_2 = Message.new(sender: user_1, text: "Hoi", topic: "Greet")
-mesg_3 = Message.new(sender: user_1, text: "Hoi", topic: "Greet", receiver: user_2)
-
-user_1.post_message(mesg_1)
-user_2.post_message(mesg_2)
-user_2.post_message(mesg_3)</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Run this using:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/structs_n_records/message_struct.cr</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>In this way we can add (possibly remove) data and features from the <strong>Message</strong> all transparently to the <strong>User</strong></p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_records">3. Records</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Fundamentally <strong>Records</strong> are <strong>Structs</strong> with the <em>initializer</em> and <em>getters</em> automatically defined for your.</p>
-</div>
-<div class="sect2">
-<h3 id="_records_no_methods">3.1. Records (no methods)</h3>
-<div class="paragraph">
-<p>Thus the simplest Record definition for a Message would be:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="crystal">record(Message, sender : User, text : String, receiver : User? = nil, topic : String? = nil)
-
-# or without the parens
-
-record Message, sender : User, text : String, receiver : User? = nil, topic : String? = nil</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The following code demostrates how to use records.</p>
-</div>
-<div class="listingblock">
-<div class="title">src/structs_n_records/simple_record.cr</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="linenums">require "./user"
-
-record(Message, sender : User, text : String, receiver : User? = nil, topic : String? = nil)
-
-user_1 = User.new(name: "user_1", email: "user_1@example.com")
-user_2 = User.new(name: "user_2", email: "user_2@example.com")
-
-mesg_1 = Message.new(sender: user_2, text: "Hi")
-mesg_2 = Message.new(sender: user_1, text: "Hoi", topic: "Greet")
-mesg_3 = Message.new(sender: user_1, text: "Hoi", topic: "Greet", receiver: user_2)
-
-user_1.post_message(mesg_1)
-user_2.post_message(mesg_2)
-user_2.post_message(mesg_3)</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Run this using:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/structs_n_records/simple_record.cr</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This of course has the same limitation as a Struct without a <code>to_s</code> methods.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_records_with_methods">3.2. Records (with methods)</h3>
-<div class="paragraph">
-<p>Assuming you want a custom method then the record looks like:</p>
-</div>
-<div class="listingblock">
-<div class="title">src/structs_n_records/message_record.cr</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="linenums">require "./user"
-
-record(Message, sender : User,          text : String,
-                receiver : User? = nil, topic : String = "") do
-  def to_s
-    output = [] of String
-    output &lt;&lt; "-" * 30
-    output &lt;&lt; "From: #{sender.to_s}"
-    output &lt;&lt; "To: #{receiver.to_s}"  unless receiver.nil?
-    output &lt;&lt; "Topic: #{topic.to_s.strip}"
-    output &lt;&lt; text.strip
-    output &lt;&lt; "-" * 30
-    output.join("\n")
-  end
-end
-
-user_1 = User.new(name: "user_1", email: "user_1@example.com")
-user_2 = User.new(name: "user_2", email: "user_2@example.com")
-
-mesg_1 = Message.new(sender: user_2, text: "Hi")
-mesg_2 = Message.new(sender: user_1, text: "Hoi", topic: "Greet")
-mesg_3 = Message.new(sender: user_1, text: "Hoi", topic: "Greet", receiver: user_2)
-
-user_1.post_message(mesg_1)
-user_2.post_message(mesg_2)
-user_2.post_message(mesg_3)</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Run this using:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/structs_n_records/message_record.cr</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>As you can see in many cases using a record has all the power of a struct and removes boilerplate code.</p>
-</div>
 <div class="paragraph">
 <p><strong><a href="index.html">Start Page</a></strong></p>
 </div>
 </div>
 </div>
 </div>
-</div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-12 20:40:56 +0100
+Last updated 2020-01-12 20:57:00 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">

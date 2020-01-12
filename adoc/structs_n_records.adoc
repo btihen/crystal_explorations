@@ -55,11 +55,6 @@ Good uses include:
 * Given structs are COPIED - very large structures may slow-down your code and use a lot of memory.
 ****
 
-.TODO
-****
-Check if Crystal structs have built in value comparisons or if those need to be added to build a proper *Value Object*
-****
-
 == Structs
 
 Structs are immutable classes focused on presenting / passing data.

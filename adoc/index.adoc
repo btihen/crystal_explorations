@@ -3,6 +3,10 @@
 :source-language: crystal
 Bill Tihen (Crystal 0.32.1)
 Version 0.0.1
+:sectnums:
+:toc:
+:toclevels: 4
+:toc-title: Contents
 
 :description: Exploring Crystal's Features
 :keywords: Crystal Language
@@ -16,9 +20,7 @@ Exploring & Learning Crystal Language with code examples and augment the documen
 * This code does not focus on best practices, security nor being production ready.
 ****
 
-== Contents
-
-=== Installation
+== Installation
 
 On MacOS - use:
 ```bash
@@ -27,7 +29,7 @@ $ brew install crystal
 
 For all other systems see: https://crystal-lang.org/install/
 
-=== link:crystal_cli.html[Crystal CLI]
+== link:crystal_cli.html[Crystal CLI]
 
 * Useful commands when using crystal
 * My most useful command while developing is:
@@ -35,63 +37,82 @@ For all other systems see: https://crystal-lang.org/install/
 crystal run src/file_name.cr
 ```
 
-=== link:structs_n_records.html[Structs & Records]
+== link:structs_n_records.html[Structs & Records]
 
 * Structs _(& Records)_ are immutable data structures - these are `safe` when used in a concurrent/parallel context.
 
-=== link:concurrency_basics.html[Concurrency]
+== Value Objects (pass values with a context)
+
+.TODO
+****
+Check if Crystal structs have built in value comparisons or if those need to be added to build a proper *Value Object*
+****
+
+== link:concurrency_basics.html[Concurrency]
 
 * Basics on starting processes concurrently
 
-=== link:concurrent_objects.html[Concurrent Objects]
+== link:concurrent_objects.html[Concurrent Objects]
 
 * Examples of using concurrency with objects
 
-=== link:channel_basics.html[Channel Basics]
+== link:channel_basics.html[Channel Basics]
 
 * Channels allow us to safely communicate between concurrent processes.
 * To safely share data/state send immutable data only **(Structs are a good option)**.
 
+== Buffered Channels
+
+* What to do when messages come faster than collected
+
 NOTE: Share the smallest possible data structure - large data structures will be slow to copy.
 
-=== link:channel_callbacks.html[Concurrent State Sharing]
+== link:channel_callbacks.html[Concurrent State Sharing]
 
 * Safely share state information when its available
 
-=== link:channel_buffers.html[Channel Buffers]
+== link:channel_buffers.html[Channel Buffers]
 
 * Handling async message queues
 
-=== Parallelism
+== Parallelism (with WebSockets)
 
 * Compiling to use multiple CPUs
 
-=== Macros
+== Macros
 
 * Crystal's answer to Meta-programming
 * Using macros to reduce boiler-plate and build a simple **Actor Model**
 
-=== Concurrency using the **Actor Model**
+== Concurrency using the **Actor Model**
 
 * Using macros to build async message sending, callbacks and state sharing.
 
-=== Resources
+== Resources
 
-* Crystal Lang API Docs - https://crystal-lang.org/api/0.32.1/
+* Crystal Git Repo - https://github.com/crystal-lang/crystal/
 * Crystal Lang GitBook - https://crystal-lang.org/reference/guides
-* *Crystal Lang Gitter - https://gitter.im/crystal-lang/crystal* folks instrumental in helping me better undstand and putting these ideas into a context where I could write code that works (special mention to: @stnluu_twitter, @watzon, @repomaa, @randiaz95)
+* Crystal Lang API Docs - https://crystal-lang.org/api/0.32.1/index.html
+* Crystal Lang Gitter - https://gitter.im/crystal-lang/crystal -- friendly people instrumental in helping me better understand how to implement these ideas in crystal (special mention to: @stnluu_twitter, @watzon, @repomaa, @randiaz95, @straight-shoota & @paulcsmith)
 
-=== Generating the Docs
+== Generating the Docs
 
 ```bash
 asciidoctor -D docs adoc/*
 ```
 
-=== TODO:
+== TODO:
 
-* review, augment and adapt content using: https://blog.golang.org/pipelines
+* Add Macros
+* Write Channel Buffering
+* Reseach Promises in Crystal
+* Finish Callbacks & (Notification)
+* Research/Add Crystal Value Objects
+* Build a Macro to make a simple Actor Class
+* Add Parallelism (Ideally with WebSockets example -- to extend `chat`)
+* Add, review, augment and adapt content using: https://blog.golang.org/pipelines
 
-=== Corrections & Improvements
+== Corrections & Improvements
 
 - please make a https://github.com/btihen/crystal_explorations/issues[Github issue], a pull request or contact me to improve this document.
 

@@ -444,6 +444,28 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <span id="author" class="author">Bill Tihen (Crystal 0.32.1)</span><br>
 <span id="revdate">Version 0.0.1</span>
 </div>
+<div id="toc" class="toc">
+<div id="toctitle">Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_installation">1. Installation</a></li>
+<li><a href="#_crystal_cli">2. Crystal CLI</a></li>
+<li><a href="#_structs_records">3. Structs &amp; Records</a></li>
+<li><a href="#_value_objects_pass_values_with_a_context">4. Value Objects (pass values with a context)</a></li>
+<li><a href="#_concurrency">5. Concurrency</a></li>
+<li><a href="#_concurrent_objects">6. Concurrent Objects</a></li>
+<li><a href="#_channel_basics">7. Channel Basics</a></li>
+<li><a href="#_buffered_channels">8. Buffered Channels</a></li>
+<li><a href="#_concurrent_state_sharing">9. Concurrent State Sharing</a></li>
+<li><a href="#_channel_buffers">10. Channel Buffers</a></li>
+<li><a href="#_parallelism_with_websockets">11. Parallelism (with WebSockets)</a></li>
+<li><a href="#_macros">12. Macros</a></li>
+<li><a href="#_concurrency_using_the_actor_model">13. Concurrency using the <strong>Actor Model</strong></a></li>
+<li><a href="#_resources">14. Resources</a></li>
+<li><a href="#_generating_the_docs">15. Generating the Docs</a></li>
+<li><a href="#_todo">16. TODO:</a></li>
+<li><a href="#_corrections_improvements">17. Corrections &amp; Improvements</a></li>
+</ul>
+</div>
 </div>
 <div id="content">
 <div id="preamble">
@@ -469,10 +491,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect1">
-<h2 id="_contents">Contents</h2>
+<h2 id="_installation">1. Installation</h2>
 <div class="sectionbody">
-<div class="sect2">
-<h3 id="_installation">Installation</h3>
 <div class="paragraph">
 <p>On MacOS - use:</p>
 </div>
@@ -485,8 +505,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>For all other systems see: <a href="https://crystal-lang.org/install/" class="bare">https://crystal-lang.org/install/</a></p>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_crystal_cli"><a href="crystal_cli.html">Crystal CLI</a></h3>
+</div>
+<div class="sect1">
+<h2 id="_crystal_cli">2. <a href="crystal_cli.html">Crystal CLI</a></h2>
+<div class="sectionbody">
 <div class="ulist">
 <ul>
 <li>
@@ -503,8 +525,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_structs_records"><a href="structs_n_records.html">Structs &amp; Records</a></h3>
+</div>
+<div class="sect1">
+<h2 id="_structs_records">3. <a href="structs_n_records.html">Structs &amp; Records</a></h2>
+<div class="sectionbody">
 <div class="ulist">
 <ul>
 <li>
@@ -513,8 +537,23 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </ul>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_concurrency"><a href="concurrency_basics.html">Concurrency</a></h3>
+</div>
+<div class="sect1">
+<h2 id="_value_objects_pass_values_with_a_context">4. Value Objects (pass values with a context)</h2>
+<div class="sectionbody">
+<div class="sidebarblock">
+<div class="content">
+<div class="title">TODO</div>
+<div class="paragraph">
+<p>Check if Crystal structs have built in value comparisons or if those need to be added to build a proper <strong>Value Object</strong></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_concurrency">5. <a href="concurrency_basics.html">Concurrency</a></h2>
+<div class="sectionbody">
 <div class="ulist">
 <ul>
 <li>
@@ -523,8 +562,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </ul>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_concurrent_objects"><a href="concurrent_objects.html">Concurrent Objects</a></h3>
+</div>
+<div class="sect1">
+<h2 id="_concurrent_objects">6. <a href="concurrent_objects.html">Concurrent Objects</a></h2>
+<div class="sectionbody">
 <div class="ulist">
 <ul>
 <li>
@@ -533,8 +574,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </ul>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_channel_basics"><a href="channel_basics.html">Channel Basics</a></h3>
+</div>
+<div class="sect1">
+<h2 id="_channel_basics">7. <a href="channel_basics.html">Channel Basics</a></h2>
+<div class="sectionbody">
 <div class="ulist">
 <ul>
 <li>
@@ -542,6 +585,18 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li>
 <p>To safely share data/state send immutable data only <strong>(Structs are a good option)</strong>.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_buffered_channels">8. Buffered Channels</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>What to do when messages come faster than collected</p>
 </li>
 </ul>
 </div>
@@ -558,8 +613,10 @@ Share the smallest possible data structure - large data structures will be slow 
 </table>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_concurrent_state_sharing"><a href="channel_callbacks.html">Concurrent State Sharing</a></h3>
+</div>
+<div class="sect1">
+<h2 id="_concurrent_state_sharing">9. <a href="channel_callbacks.html">Concurrent State Sharing</a></h2>
+<div class="sectionbody">
 <div class="ulist">
 <ul>
 <li>
@@ -568,8 +625,10 @@ Share the smallest possible data structure - large data structures will be slow 
 </ul>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_channel_buffers"><a href="channel_buffers.html">Channel Buffers</a></h3>
+</div>
+<div class="sect1">
+<h2 id="_channel_buffers">10. <a href="channel_buffers.html">Channel Buffers</a></h2>
+<div class="sectionbody">
 <div class="ulist">
 <ul>
 <li>
@@ -578,8 +637,10 @@ Share the smallest possible data structure - large data structures will be slow 
 </ul>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_parallelism">Parallelism</h3>
+</div>
+<div class="sect1">
+<h2 id="_parallelism_with_websockets">11. Parallelism (with WebSockets)</h2>
+<div class="sectionbody">
 <div class="ulist">
 <ul>
 <li>
@@ -588,8 +649,10 @@ Share the smallest possible data structure - large data structures will be slow 
 </ul>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_macros">Macros</h3>
+</div>
+<div class="sect1">
+<h2 id="_macros">12. Macros</h2>
+<div class="sectionbody">
 <div class="ulist">
 <ul>
 <li>
@@ -601,8 +664,10 @@ Share the smallest possible data structure - large data structures will be slow 
 </ul>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_concurrency_using_the_actor_model">Concurrency using the <strong>Actor Model</strong></h3>
+</div>
+<div class="sect1">
+<h2 id="_concurrency_using_the_actor_model">13. Concurrency using the <strong>Actor Model</strong></h2>
+<div class="sectionbody">
 <div class="ulist">
 <ul>
 <li>
@@ -611,42 +676,74 @@ Share the smallest possible data structure - large data structures will be slow 
 </ul>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_resources">Resources</h3>
+</div>
+<div class="sect1">
+<h2 id="_resources">14. Resources</h2>
+<div class="sectionbody">
 <div class="ulist">
 <ul>
 <li>
-<p>Crystal Lang API Docs - <a href="https://crystal-lang.org/api/0.32.1/" class="bare">https://crystal-lang.org/api/0.32.1/</a></p>
+<p>Crystal Git Repo - <a href="https://github.com/crystal-lang/crystal/" class="bare">https://github.com/crystal-lang/crystal/</a></p>
 </li>
 <li>
 <p>Crystal Lang GitBook - <a href="https://crystal-lang.org/reference/guides" class="bare">https://crystal-lang.org/reference/guides</a></p>
 </li>
 <li>
-<p><strong>Crystal Lang Gitter - <a href="https://gitter.im/crystal-lang/crystal" class="bare">https://gitter.im/crystal-lang/crystal</a></strong> folks instrumental in helping me better undstand and putting these ideas into a context where I could write code that works (special mention to: @stnluu_twitter, @watzon, @repomaa, @randiaz95)</p>
+<p>Crystal Lang API Docs - <a href="https://crystal-lang.org/api/0.32.1/index.html" class="bare">https://crystal-lang.org/api/0.32.1/index.html</a></p>
+</li>
+<li>
+<p>Crystal Lang Gitter - <a href="https://gitter.im/crystal-lang/crystal&#8201;&#8212;&#8201;friendly" class="bare">https://gitter.im/crystal-lang/crystal&#8201;&#8212;&#8201;friendly</a> people instrumental in helping me better understand how to implement these ideas in crystal (special mention to: @stnluu_twitter, @watzon, @repomaa, @randiaz95, @straight-shoota &amp; @paulcsmith)</p>
 </li>
 </ul>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_generating_the_docs">Generating the Docs</h3>
+</div>
+<div class="sect1">
+<h2 id="_generating_the_docs">15. Generating the Docs</h2>
+<div class="sectionbody">
 <div class="listingblock">
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="bash">asciidoctor -D docs adoc/*</code></pre>
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_todo">TODO:</h3>
+</div>
+<div class="sect1">
+<h2 id="_todo">16. TODO:</h2>
+<div class="sectionbody">
 <div class="ulist">
 <ul>
 <li>
-<p>review, augment and adapt content using: <a href="https://blog.golang.org/pipelines" class="bare">https://blog.golang.org/pipelines</a></p>
+<p>Add Macros</p>
+</li>
+<li>
+<p>Write Channel Buffering</p>
+</li>
+<li>
+<p>Reseach Promises in Crystal</p>
+</li>
+<li>
+<p>Finish Callbacks &amp; (Notification)</p>
+</li>
+<li>
+<p>Research/Add Crystal Value Objects</p>
+</li>
+<li>
+<p>Build a Macro to make a simple Actor Class</p>
+</li>
+<li>
+<p>Add Parallelism (Ideally with WebSockets example&#8201;&#8212;&#8201;to extend <code>chat</code>)</p>
+</li>
+<li>
+<p>Add, review, augment and adapt content using: <a href="https://blog.golang.org/pipelines" class="bare">https://blog.golang.org/pipelines</a></p>
 </li>
 </ul>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_corrections_improvements">Corrections &amp; Improvements</h3>
+</div>
+<div class="sect1">
+<h2 id="_corrections_improvements">17. Corrections &amp; Improvements</h2>
+<div class="sectionbody">
 <div class="ulist">
 <ul>
 <li>
@@ -660,10 +757,9 @@ Share the smallest possible data structure - large data structures will be slow 
 </div>
 </div>
 </div>
-</div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-12 12:42:42 +0100
+Last updated 2020-01-12 22:13:10 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">

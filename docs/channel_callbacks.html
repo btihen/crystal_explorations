@@ -447,7 +447,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toc" class="toc">
 <div id="toctitle">Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_call_back_channels">1. Call-Back Channels</a></li>
+<li><a href="#_channel_callbacks">1. Channel Callbacks</a></li>
 </ul>
 </div>
 </div>
@@ -460,34 +460,23 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect1">
-<h2 id="_call_back_channels">1. Call-Back Channels</h2>
+<h2 id="_channel_callbacks">1. Channel Callbacks</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>When we no longer need to communicate with a <code>User</code> we are keeping the channel open - which won&#8217;t allow the garbage collector to remove unused instances.</p>
 </div>
 <div class="paragraph">
-<p>Ideally, we will close the channels when we are done and we can even use that info to know if we can end our <strong>main thread</strong> (program).</p>
-</div>
-<div class="paragraph">
-<p>@stnluu_twitter &amp; @randiaz95 - I have two versions of using channels and fibers at: <a href="https://github.com/btihen/crystal_channels" class="bare">https://github.com/btihen/crystal_channels</a> - It works pretty well. I next want to figure out how to create multiple TCP or windows (one for each user). I realized when doing the chat room - using one thread works well - but compiliing with multiple cores - outputting to one screen gets jumbled again. I&#8217;ll happily learn more about multiple connections (I assume I need to use TCP sockets) - could I also use OS sockets?</p>
-</div>
-<div class="paragraph">
-<p>who is doing the output to screen?
-remember yesterday, we discussed about ideally, there&#8217;s a "room" object that keeps track of all the users, and does the job of broadcasting the message–instead of each user keeping track of all the other users?
-ideally, this "room" object should be the one doing the output to screen, aka only one fiber doing the output.</p>
-</div>
-<div class="paragraph">
-<p>from @repomaa</p>
+<p>Ideally, we will close the channel, remove the user from the chat registry and only close the chat after all messages are delivered.</p>
 </div>
 <div class="listingblock">
 <div class="title">src/channel_callbacks/user.cr</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="linenums">class User
   getter channel : Channel(String)
-  private getter name : String, email : String, status : Channel(Nil)
+  private getter name : String, email : String, sign_out : Channel(User)
 
   def initialize(@name, @email, @status)
-    @channel = Channel(String).new
+    @channel = Channel(String).new(2)
     listen_for_messages
   end
 
@@ -503,7 +492,8 @@ ideally, this "room" object should be the one doing the output to screen, aka on
 
         puts "To: #{to_s} -- #{message}"
       end
-      status.send(nil)   # loop ends when channels closes - send close status
+      puts "#{to_s} -- CLOSING"
+      sign_out.send(self)   # loop ends when channels closes - send close status
     end
   end
 end</code></pre>
@@ -515,7 +505,8 @@ end</code></pre>
 <pre class="prettyprint highlight"><code data-lang="linenums">require "./user"
 
 # create users
-status = Channel(Nil).new
+status = Channel(User).new
+
 user_1 = User.new(name: "first",  email: "first@example.ch", status: status)
 user_2 = User.new(name: "second", email: "second@example.ch", status: status)
 
@@ -614,7 +605,7 @@ Fix for the stress testing is buffering when switching back and forth between sy
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-12 14:19:38 +0100
+Last updated 2020-01-12 21:13:59 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">

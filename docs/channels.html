@@ -496,7 +496,7 @@ The code is just good enough to demonstrate what is happening.
 <p>In the following code the <code>User</code> creates a fiber that listens to new messages on its <code>channel</code> to receive messages asynchronously.  We <code>channel.receive</code> <strong>(listen)</strong> for new messages within a <strong>spawn block</strong> to create a <code>fiber</code> that loops waiting to receive and process new messages <em>(basically making our own even loop listening for messages over a channel).</em></p>
 </div>
 <div class="listingblock">
-<div class="title">src/simple_channels/user.cr</div>
+<div class="title">src/channel_basics/user.cr</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="crystal">class User
   getter channel : Channel(String)
@@ -530,7 +530,7 @@ end</code></pre>
 <p>To use the above code we will make two users and send each messages from Crystal&#8217;s main thread directly to their respective channels.</p>
 </div>
 <div class="listingblock">
-<div class="title">src/simple_channels/main.cr</div>
+<div class="title">src/channel_basics/main.cr</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="crystal">require "./user"
 
@@ -569,7 +569,7 @@ end</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/simple_channels/main.cr</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/channel_basics/main.cr</code></pre>
 </div>
 </div>
 </div>
@@ -582,7 +582,7 @@ end</code></pre>
 <p>In order to close channels we can use <code>object.channel.close</code> - to check if a channel is closed we can use: <code>object.channel.closed?</code></p>
 </div>
 <div class="listingblock">
-<div class="title">src/simple_channels/main_close.cr</div>
+<div class="title">src/channel_basics/main_close.cr</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="crystal">require "./user"
 
@@ -628,7 +628,7 @@ end</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/simple_channels/main_close.cr</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/channel_basics/main_close.cr</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -644,7 +644,7 @@ end</code></pre>
 <p>How well does our code work when messaging lots of objects?</p>
 </div>
 <div class="listingblock">
-<div class="title">src/simple_channels/main_stress.cr</div>
+<div class="title">src/channel_basics/main_stress.cr</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="crystal">require "./user"
 
@@ -701,7 +701,7 @@ end</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/simple_channels/main_stress.cr</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/channel_basics/main_stress.cr</code></pre>
 </div>
 </div>
 <div class="paragraph">

@@ -1,4 +1,4 @@
-= Crystal Lang Channel Callbacks
+= Crystal Lang Explorations -- Channel Callbacks
 :source-highlighter: prettify
 :source-language: crystal
 Bill Tihen (Crystal 0.32.1)
@@ -17,8 +17,11 @@ Version 0.0.1
 
 Exploring & Learning Crystal Language with code examples and augment the documentation.
 
-NOTE: This code does not focus on best practices, security or production ready code. +
-The code is just good enough to demonstrate what is happening.
+.NOTE:
+****
+* The code is just good enough to demonstrate an idea.
+* This code does not focus on best practices, security nor being production ready.
+****
 
 == Call-Back Channels
 
@@ -37,7 +40,7 @@ ideally, this "room" object should be the one doing the output to screen, aka on
 from @repomaa
 
 .src/channel_callbacks/user.cr
-[source]
+[source,linenums]
 ----
 class User
   getter channel : Channel(String)
@@ -67,7 +70,7 @@ end
 ----
 
 .src/channel_callbacks/main.cr
-[source]
+[source,linenums]
 ----
 require "./user"
 
@@ -100,7 +103,7 @@ Now we can wait for all channels to close.
 Below shows code that allows us to track users 'registered' in the `users` array (we remove users when they close their channel)
 
 .src/channel_callbacks/main_stress.cr
-[source]
+[source,linenums]
 ----
 require "./user"
 

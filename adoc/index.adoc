@@ -1,4 +1,4 @@
-= Crystal Lang Explorations
+= Crystal Lang Explorations -- Start Page
 :source-highlighter: prettify
 :source-language: crystal
 Bill Tihen (Crystal 0.32.1)
@@ -10,8 +10,11 @@ Version 0.0.1
 
 Exploring & Learning Crystal Language with code examples and augment the documentation.
 
-NOTE: This code does not focus on best practices, security or production ready code. +
-The code is just good enough to demonstrate what is happening.
+.NOTE:
+****
+* The code is just good enough to demonstrate an idea.
+* This code does not focus on best practices, security nor being production ready.
+****
 
 == Contents
 
@@ -24,23 +27,53 @@ $ brew install crystal
 
 For all other systems see: https://crystal-lang.org/install/
 
+=== link:crystal_cli.html[Crystal CLI]
+
+* Useful commands when using crystal
+* My most useful command while developing is:
+```
+crystal run src/file_name.cr
+```
+
 === link:structs_n_records.html[Structs & Records]
 
-=== link:cli.html[Crystal CLI]
+* Structs _(& Records)_ are immutable data structures - these are `safe` when used in a concurrent/parallel context.
 
-=== link:concurrency.html[Concurrency]
+=== link:concurrency_basics.html[Concurrency]
 
-TODO: review, augment and adapt content using: https://blog.golang.org/pipelines
+* Basics on starting processes concurrently
 
-=== link:channels.html[Channels]
+=== link:concurrent_objects.html[Concurrent Objects]
 
-=== link:channel_callbacks.html[Channel Callbacks]
+* Examples of using concurrency with objects
+
+=== link:channel_basics.html[Channel Basics]
+
+* Channels allow us to safely communicate between concurrent processes.
+* To safely share data/state send immutable data only **(Structs are a good option)**.
+
+NOTE: Share the smallest possible data structure - large data structures will be slow to copy.
+
+=== link:channel_callbacks.html[Concurrent State Sharing]
+
+* Safely share state information when its available
 
 === link:channel_buffers.html[Channel Buffers]
 
+* Handling async message queues
+
 === Parallelism
 
+* Compiling to use multiple CPUs
+
 === Macros
+
+* Crystal's answer to Meta-programming
+* Using macros to reduce boiler-plate and build a simple **Actor Model**
+
+=== Concurrency using the **Actor Model**
+
+* Using macros to build async message sending, callbacks and state sharing.
 
 === Resources
 
@@ -54,6 +87,9 @@ TODO: review, augment and adapt content using: https://blog.golang.org/pipelines
 asciidoctor -D docs adoc/*
 ```
 
+=== TODO:
+
+* review, augment and adapt content using: https://blog.golang.org/pipelines
 
 === Corrections & Improvements
 

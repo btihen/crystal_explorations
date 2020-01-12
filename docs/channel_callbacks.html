@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
 <meta name="author" content="Bill Tihen (Crystal 0.32.1)">
-<title>Crystal Lang Channel Callbacks</title>
+<title>Crystal Lang Explorations&#8201;&#8212;&#8201;Channel Callbacks</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -439,7 +439,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
-<h1>Crystal Lang Channel Callbacks</h1>
+<h1>Crystal Lang Explorations&#8201;&#8212;&#8201;Channel Callbacks</h1>
 <div class="details">
 <span id="author" class="author">Bill Tihen (Crystal 0.32.1)</span><br>
 <span id="revdate">Version 0.0.1</span>
@@ -460,18 +460,20 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="paragraph">
 <p>Exploring &amp; Learning Crystal Language with code examples and augment the documentation.</p>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">
-This code does not focus on best practices, security or production ready code.<br>
-The code is just good enough to demonstrate what is happening.
-</td>
-</tr>
-</table>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">NOTE:</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The code is just good enough to demonstrate an idea.</p>
+</li>
+<li>
+<p>This code does not focus on best practices, security nor being production ready.</p>
+</li>
+</ul>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -498,7 +500,7 @@ ideally, this "room" object should be the one doing the output to screen, aka on
 <div class="listingblock">
 <div class="title">src/channel_callbacks/user.cr</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="crystal">class User
+<pre class="prettyprint highlight"><code data-lang="linenums">class User
   getter channel : Channel(String)
   private getter name : String, email : String, status : Channel(Nil)
 
@@ -528,7 +530,7 @@ end</code></pre>
 <div class="listingblock">
 <div class="title">src/channel_callbacks/main.cr</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="crystal">require "./user"
+<pre class="prettyprint highlight"><code data-lang="linenums">require "./user"
 
 # create users
 status = Channel(Nil).new
@@ -566,7 +568,7 @@ user_2.channel.close
 <div class="listingblock">
 <div class="title">src/channel_callbacks/main_stress.cr</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="crystal">require "./user"
+<pre class="prettyprint highlight"><code data-lang="linenums">require "./user"
 
 module MainStress
 
@@ -619,6 +621,10 @@ end</code></pre>
 </div>
 </div>
 <div class="paragraph">
+<p>@stnluu_twitter
+Fix for the stress testing is buffering when switching back and forth between sync and async.</p>
+</div>
+<div class="paragraph">
 <p><strong><a href="index.html">Start Page</a></strong></p>
 </div>
 </div>
@@ -626,7 +632,7 @@ end</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-05 20:57:03 +0100
+Last updated 2020-01-12 12:42:59 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">

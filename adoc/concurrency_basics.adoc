@@ -1,4 +1,4 @@
-= Crystal Lang Concurrency
+= Crystal Lang Explorations -- Concurrency Basics
 :source-highlighter: prettify
 :source-language: crystal
 Bill Tihen (Crystal 0.32.1)
@@ -16,8 +16,11 @@ Version 0.0.1
 
 Exploring & Learning Crystal Language with code examples and augment the documentation.
 
-NOTE: This code does not focus on best practices, security or production ready code. +
-The code is just good enough to demonstrate what is happening.
+.NOTE:
+****
+* The code is just good enough to demonstrate an idea.
+* This code does not focus on best practices, security nor being production ready.
+****
 
 == Concurrency
 
@@ -35,12 +38,12 @@ There two main way to `spawn` threads - we will need both:
 - using the block notation
 - using the method call notation
 
-=== Spawn Block
+=== Spawn Block and Fiber Execution
 
 A spawn block looks like:
 
 .src/concurrency/spawn_block.cr
-[source]
+[source,linenums]
 ----
 puts "before spawn"
 spawn do
@@ -60,10 +63,12 @@ NOTE: We don't see the text *within spawn*
 
 In order to get the main thread to let the Fiber run before ending we need to uncomment the `Fiber.yield` and run again - this tells the main thread to process the fibers on the *main thread* - later we will see there are other actions that trigger the *main thread* to yield to the Fibers.
 
-Spawn block - uses the value given at the time when the Fiber is executed - which can lead to unexpected results. Try the following code:
+=== Spawn Block _(Passes Values when Fiber EXECUTES)_
+
+Spawn block - uses the **value at the time when the Fiber is executed** - which can lead to unexpected results. Try the following code:
 
 .src/concurrency/spawn_block_unexpected.cr
-[source]
+[source,linenums]
 ----
 i = 0
 puts "SYNC: i = 0 = #{i}"     # synchronous
@@ -85,6 +90,8 @@ Run with:
 $ crystal src/concurrency/spawn_block_unexpected.cr
 ```
 
+=== Spawn Block with Procs _(Passes Values when Fiber SPAWNED)_
+
 Because i = 1 at the time when the fibers execute '1' is printed twice - this is probably not desired in this case.  The solution is to use `Proc`
 
 The solution is to define a proc which will pass the value at the time the `Proc` is called NOT when the `Fiber` is executed.
@@ -92,7 +99,7 @@ The solution is to define a proc which will pass the value at the time the `Proc
 This code works as expected, but is clumsy looking:
 
 .src/concurrency/spawn_proc.cr
-[source]
+[source,linenums]
 ----
 i = 0
 puts "SYNC: i = 0 = #{i}"       # synchronous
@@ -122,12 +129,12 @@ $ crystal src/concurrency/spawn_proc_block.cr
 
 NOTE: now all works well - but lots of code for 2 simple `puts` statements.
 
-=== Spawn Method Call
+=== Spawn Method Call _(simple passing values at spawn)_
 
 A *much nicer* way to pass the value at the time of call -- not at the time of execution is to use the `spawn` call:
 
 .src/concurrency/spawn_call.cr
-[source]
+[source,linenums]
 ----
 i = 0
 puts "SYNC: i = 0 = #{i}"         # synchronous
@@ -146,75 +153,6 @@ $ crystal src/concurrency/spawn_call.cr
 ```
 
 This is syntactic sugar (a crystal `macro`) for `proc`-`spawn` technique shown above.  I find this syntax far more attractive and will be used for method calls from now on!
-
-=== Spawning Fibers between Objects
-
-We `spawn` to other objects for concurrent processing.  This next code sample shows how to send both synchronous and asynchronous messages from the *main thread* to objects which will be evaluated within a `Fiber`.
-
-Here is our base `User` object:
-
-.src/concurrency/user.cr
-[source]
-----
-class User
-  getter channel : Channel(String)
-  private getter name : String, email : String
-
-  def initialize(@name, @email)
-    @channel = Channel(String).new
-  end
-
-  def to_s
-    "#{name} <#{email}>"
-  end
-
-  def post_message(message : String)
-    puts "To: #{to_s} -- #{message}"
-  end
-end
-----
-
-Code to send `user` messages:
-
-.src/concurrency/user_messaging.cr
-[source]
-----
-require "./user"     # autoloads the above user.cr file
-
-# USAGE
-module UserMessaging
-  # create users
-  user_1 = User.new(name: "first",  email: "first@example.ch")
-  user_2 = User.new(name: "second", email: "second@example.ch")
-
-  # send messages
-  puts "REAL-TIME - START"
-
-  # send an async message
-  spawn user_1.post_message("ASYNC sent 1st")
-
-  # send a synchronous message
-  user_1.post_message("REAL-TIME sent 2nd")
-  user_1.post_message("REAL-TIME sent 3rd")
-
-  puts "SWITCH to user_2"
-  spawn user_2.post_message("ASYNC sent 4th")
-  user_2.post_message("REAL-TIME sent 5th")
-
-  puts "SWITCH back to user_1"
-  user_1.post_message("REAL-TIME sent 6th")
-  spawn user_1.post_message("ASYNC sent 7th")
-  puts "REAL-TIME - DONE"
-
-  # Allow Fibers (async messages) to execute
-  Fiber.yield
-end
-----
-
-Run with:
-```bash
-$ crystal src/concurrency/spawn_call.cr
-```
 
 Just a reminder, notice how all async messages happen after `Fiber.yield`
 

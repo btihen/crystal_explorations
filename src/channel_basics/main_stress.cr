@@ -1,4 +1,4 @@
-# src/simple_channels/main_stress.cr
+# src/channel_basics/main_stress.cr
 require "./user"
 
 module MainStress

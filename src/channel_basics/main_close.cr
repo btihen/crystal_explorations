@@ -1,4 +1,4 @@
-# src/simple_channels/main_close.cr
+# src/channel_basics/main_close.cr
 require "./user"
 
 # USAGE

@@ -1,4 +1,4 @@
-= Crystal Lang Channels
+= Crystal Lang Explorations -- Channel Basics
 :source-highlighter: prettify
 :source-language: crystal
 Bill Tihen (Crystal 0.32.1)
@@ -16,8 +16,11 @@ Version 0.0.1
 
 Exploring & Learning Crystal Language with code examples and augment the documentation.
 
-NOTE: This code does not focus on best practices, security or production ready code. +
-The code is just good enough to demonstrate what is happening.
+.NOTE:
+****
+* The code is just good enough to demonstrate an idea.
+* This code does not focus on best practices, security nor being production ready.
+****
 
 == Channels
 
@@ -30,8 +33,8 @@ We will use channels to communicate between Users listening concurrently for mes
 In the following code the `User` creates a fiber that listens to new messages on its `channel` to receive messages asynchronously.  We `channel.receive` *(listen)* for new messages within a *spawn block* to create a `fiber` that loops waiting to receive and process new messages _(basically making our own even loop listening for messages over a channel)._
 
 
-.src/simple_channels/user.cr
-[source]
+.src/channel_basics/user.cr
+[source,linenums]
 ----
 class User
   getter channel : Channel(String)
@@ -63,8 +66,8 @@ end
 
 To use the above code we will make two users and send each messages from Crystal's main thread directly to their respective channels.
 
-.src/simple_channels/main.cr
-[source]
+.src/channel_basics/main.cr
+[source,linenums]
 ----
 require "./user"
 
@@ -100,7 +103,7 @@ end
 
 Run with:
 ```bash
-$ crystal src/simple_channels/main.cr
+$ crystal src/channel_basics/main.cr
 ```
 
 === Closing Channels
@@ -109,8 +112,8 @@ It would be nice to be able to wait and end the main thread when all the channel
 
 In order to close channels we can use `object.channel.close` - to check if a channel is closed we can use: `object.channel.closed?`
 
-.src/simple_channels/main_close.cr
-[source]
+.src/channel_basics/main_close.cr
+[source,linenums]
 ----
 require "./user"
 
@@ -153,7 +156,7 @@ end
 
 Run with:
 ```bash
-$ crystal src/simple_channels/main_close.cr
+$ crystal src/channel_basics/main_close.cr
 ```
 
 Running this with immediate channel closing creates errors since closing the channel immediately means that messages in queued Fibers - waiting to deliver will suddenly loose their delivery channel.
@@ -164,8 +167,8 @@ A simple solution for this is to send the close asynchronously.
 
 How well does our code work when messaging lots of objects?
 
-.src/simple_channels/main_stress.cr
-[source]
+.src/channel_basics/main_stress.cr
+[source,linenums]
 ----
 require "./user"
 
@@ -219,7 +222,7 @@ end
 
 Run with:
 ```bash
-$ crystal src/simple_channels/main_stress.cr
+$ crystal src/channel_basics/main_stress.cr
 ```
 
 With the simple `Fiber.yield` we get a lot of exceptions since the channels then we wait for the async messages to be delivered.

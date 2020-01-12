@@ -5,7 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
-<title>Records</title>
+<meta name="author" content="Bill Tihen (Crystal 0.32.1)">
+<title>Crystal Lang Explorations&#8201;&#8212;&#8201;Structs and Records</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -438,121 +439,232 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
+<h1>Crystal Lang Explorations&#8201;&#8212;&#8201;Structs and Records</h1>
+<div class="details">
+<span id="author" class="author">Bill Tihen (Crystal 0.32.1)</span><br>
+<span id="revdate">Version 0.0.1</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_structs">1. Structs</a></li>
+<li><a href="#_records">2. Records</a></li>
+</ul>
+</div>
 </div>
 <div id="content">
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph">
-<p>@plambert nope, with a NamedTuple you always have to supply all of the fields. Maybe you should think about using a record instead?</p>
+<p><strong><a href="index.html">Start Page</a></strong></p>
 </div>
 <div class="paragraph">
-<p>@watzon</p>
+<p>Exploring &amp; Learning Crystal Language with code examples and augment the documentation.</p>
 </div>
-<div class="listingblock">
+<div class="sidebarblock">
 <div class="content">
-<pre class="highlight"><code>record Foo, id : Int32, name : String? = nil
-
-foo = Foo.new(32)
-# =&gt; Foo(id: 32, name: nil)</code></pre>
+<div class="title">NOTE:</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The code is just good enough to demonstrate an idea.</p>
+</li>
+<li>
+<p>This code does not focus on best practices, security nor being production ready.</p>
+</li>
+</ul>
 </div>
 </div>
-<div class="paragraph">
-<p>@watzon ooh. how is a record different from a struct?</p>
 </div>
-<div class="paragraph">
-<p>It&#8217;s just a simplified syntax for creating a Struct with a default initializer
-also defines getters and some ways to copy it</p>
-</div>
-<div class="paragraph">
-<p>You can also do</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code>record Foo, name : String, id : Int32 do
-  def do_something
-  end
-end</code></pre>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_records">Records</h2>
+<h2 id="_structs">1. Structs</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Records are a simplified way to create a Struct <em>(they have default initializer).</em></p>
+<p>Structs (&amp; Records) are basically classes, but:
+* they are immutable (once created they aren&#8217;t changed)
+* they are passed by VALUE not by REFERENCE (this means the data is COPIED)</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">NOTE:</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Immutability makes Structs (&amp; Records) safe to pass between Fibers via Channels.</p>
+</li>
+<li>
+<p>Given structs are COPIED - very large structures may slow-down your code and use a lot of memory.</p>
+</li>
+</ul>
+</div>
+</div>
 </div>
 <div class="paragraph">
-<p><strong>Record Definitions</strong></p>
+<p>I like to think of these as flexible immutable data types - with very few if any methods.  These are a great way to pass data between classes (safely - async or sync).</p>
+</div>
+<div class="paragraph">
+<p>To demonstrate Structs and Records - lets assume we have a User class that can receive messages posted to it.  We will create an immutable struct for passing the messages.</p>
+</div>
+<div class="listingblock">
+<div class="title">src/structs_n_records/user.cr</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="linenums">require "./message_record"
+
+class User
+  private getter name : String, email : String
+
+  def initialize(@name, @email)
+  end
+
+  def to_s
+    "#{name} &lt;#{email}&gt;"
+  end
+
+  def post_message(message : Message)
+    puts message.to_s
+  end
+end</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here is the simplest possible Struct (that might be used to send messages to users).</p>
+</div>
+<div class="listingblock">
+<div class="title">src/structs_n_records/message_struct_simple.cr</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="linenums">require "./user"
+
+struct MessageStruct
+  getter sender : User, receiver : User?, topic : String, text : String
+
+  def initialize(@sender  : User, @text : String, @receiver : User? = nil, @topic : String? = nil)
+    @text = text.strip
+  end
+end</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Structs can also have a method (generally, I like to create <code>to_s</code> methods) - in this case the struct would look like:</p>
+</div>
+<div class="listingblock">
+<div class="title">src/structs_n_records/message_struct.cr</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="linenums">require "./user"
+
+struct Message
+  getter sender : User, receiver : User?, topic : String, text : String
+
+  def initialize(@sender  : User, @text : String, @receiver : User? = nil, @topic : String = "")
+    @text = text.strip
+    @topic = topic.strip
+  end
+
+  def to_s
+    output = [] of String
+    output &lt;&lt; "-" * 30
+    output &lt;&lt; "From: #{sender.to_s}"
+    output &lt;&lt; "To: #{receiver.to_s}"  unless receiver.nil?
+    output &lt;&lt; "Topic: #{topic}"       unless topic == ""
+    output &lt;&lt; text.strip
+    output &lt;&lt; "-" * 30
+    output.join("\n")
+  end
+end
+
+user_1 = User.new(name: "user_1", email: "user_1@example.com")
+user_2 = User.new(name: "user_2", email: "user_2@example.com")
+
+mesg_1 = Message.new(sender: user_2, text: "Hi")
+mesg_2 = Message.new(sender: user_1, text: "Hoi", topic: "Greet")
+mesg_3 = Message.new(sender: user_1, text: "Hoi", topic: "Greet", receiver: user_2)
+
+user_1.post_message(mesg_1)
+user_2.post_message(mesg_2)
+user_2.post_message(mesg_3)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Run this using:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code>record Foo, id : Int32, name : String
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/structs_n_records/message_struct.cr</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_records">2. Records</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Records are a simplified way to create a Struct <em>(they have default initializer and getters).</em></p>
+</div>
+<div class="paragraph">
+<p>Thus the simplest Record definition looks like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="crystal">record(Message, sender : User, text : String, receiver : User? = nil, topic : String? = nil)
 # or
-record(Foo, id : Int32, name : String)</code></pre>
+record Message, sender : User, text : String, receiver : User? = nil, topic : String? = nil</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Like structs, records can also have custom behaviors - defined with:</p>
+<p>Assuming you want a custom method then the record looks like:</p>
 </div>
 <div class="listingblock">
+<div class="title">src/structs_n_records/message_record.cr</div>
 <div class="content">
-<pre class="highlight"><code>record(Foo, name : String, id : Int32) do
+<pre class="prettyprint highlight"><code data-lang="linenums">require "./user"
+
+record(Message, sender : User,          text : String,
+                receiver : User? = nil, topic : String = "") do
   def to_s
-    puts "Foo: id: #{id}; name: #{name}"
+    output = [] of String
+    output &lt;&lt; "-" * 30
+    output &lt;&lt; "From: #{sender.to_s}"
+    output &lt;&lt; "To: #{receiver.to_s}"  unless receiver.nil?
+    output &lt;&lt; "Topic: #{topic.to_s.strip}"
+    output &lt;&lt; text.strip
+    output &lt;&lt; "-" * 30
+    output.join("\n")
   end
-end</code></pre>
+end
+
+user_1 = User.new(name: "user_1", email: "user_1@example.com")
+user_2 = User.new(name: "user_2", email: "user_2@example.com")
+
+mesg_1 = Message.new(sender: user_2, text: "Hi")
+mesg_2 = Message.new(sender: user_1, text: "Hoi", topic: "Greet")
+mesg_3 = Message.new(sender: user_1, text: "Hoi", topic: "Greet", receiver: user_2)
+
+user_1.post_message(mesg_1)
+user_2.post_message(mesg_2)
+user_2.post_message(mesg_3)</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Records can be a flexible data structure (tuples and others require a fixed data structure - without `nil`s).</p>
-</div>
-<div class="paragraph">
-<p>For example if you need a simple data structure that may or maynot have all the data you can define a record with the following parameters <code>name : String? = nil</code></p>
+<p>Run this using:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code>record Foo, id : Int32, name : String? = nil do
-  def to_s
-    puts "Foo: id: #{id}; name: #{name}"
-  end
-end</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/structs_n_records/message_record.cr</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><strong>Record Usage:</strong>
-Record assignment is done using:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code>foo1 = Foo.new(1)
-# =&gt; Foo(id: 1, name: nil)
-foo2 = Foo.new(2, "Bar")
-# =&gt; Foo(id: 2, name: "Bar")</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Record usage looks like:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code>puts "id: #{foo1.id}"
-# =&gt; id: 1
-puts "name: #{foo1.name}"
-# =&gt; name:
-puts foo1.to_s
-# =&gt; Foo: id: 1; name:
-puts "id: #{foo2.id}"
-# =&gt; id: 2
-puts "name: #{foo2.name}"
-# =&gt; name: Bar
-puts foo2.to_s
-# =&gt; Foo: id: 2; name: Bar</code></pre>
-</div>
+<p>As you can see there is fundamentally no difference between Structs and Records - just simplified setup.</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-04 23:22:37 +0100
+Last updated 2020-01-12 14:16:11 +0100
 </div>
 </div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/run_prettify.min.js"></script>
 </body>
 </html>

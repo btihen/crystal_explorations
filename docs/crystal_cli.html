@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
 <meta name="author" content="Bill Tihen (Crystal 0.32.1)">
-<title>Crystal Lang Concurrency</title>
+<title>Crystal Lang Explorations&#8201;&#8212;&#8201;CLI</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -439,7 +439,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
-<h1>Crystal Lang Concurrency</h1>
+<h1>Crystal Lang Explorations&#8201;&#8212;&#8201;CLI</h1>
 <div class="details">
 <span id="author" class="author">Bill Tihen (Crystal 0.32.1)</span><br>
 <span id="revdate">Version 0.0.1</span>
@@ -447,15 +447,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toc" class="toc">
 <div id="toctitle">Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_concurrency">1. Concurrency</a>
-<ul class="sectlevel2">
-<li><a href="#_spawning_fibers_intro">1.1. Spawning Fibers Intro</a></li>
-<li><a href="#_spawn_block_and_fiber_execution">1.2. Spawn Block and Fiber Execution</a></li>
-<li><a href="#_spawn_block_passes_values_when_fiber_executes">1.3. Spawn Block <em>(Passes Values when Fiber EXECUTES)</em></a></li>
-<li><a href="#_spawn_block_with_procs_passes_values_when_fiber_spawned">1.4. Spawn Block with Procs <em>(Passes Values when Fiber SPAWNED)</em></a></li>
-<li><a href="#_spawn_method_call_simple_passing_values_at_spawn">1.5. Spawn Method Call <em>(simple passing values at spawn)</em></a></li>
-</ul>
-</li>
+<li><a href="#_crystal_cli">1. Crystal CLI</a></li>
 </ul>
 </div>
 </div>
@@ -468,205 +460,127 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="paragraph">
 <p>Exploring &amp; Learning Crystal Language with code examples and augment the documentation.</p>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">
-This code does not focus on best practices, security or production ready code.<br>
-The code is just good enough to demonstrate what is happening.
-</td>
-</tr>
-</table>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">NOTE:</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The code is just good enough to demonstrate an idea.</p>
+</li>
+<li>
+<p>This code does not focus on best practices, security nor being production ready.</p>
+</li>
+</ul>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_concurrency">1. Concurrency</h2>
+<h2 id="_crystal_cli">1. Crystal CLI</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>By default when crystal code launches a <strong>main thread</strong> is created for the running code, a separate thread is created for the <strong>garbage collector</strong>, and an <strong>Event Loop</strong> to handle IO waits - allowing the main thread to continue while waiting for slow IO calls to finish.</p>
-</div>
-<div class="paragraph">
-<p>Concurrency happens by `spawn`ing `fiber`s <em>(light-weight sub-threads within the <strong>main thread</strong>).</em>  These `fiber`s are scheduled to run within the <strong>main thread</strong> on it&#8217;s CPU.  Concurrency is a form of <strong>multi-tasking</strong> - quickly switching between tasks on the <strong>main thead.</strong></p>
-</div>
-<div class="paragraph">
-<p>Parallelism - <em>with the appropriate compiler switches</em> - allows processes to happen simultaneously on separate CPUs.</p>
-</div>
-<div class="sect2">
-<h3 id="_spawning_fibers_intro">1.1. Spawning Fibers Intro</h3>
-<div class="paragraph">
-<p>New Fibers are created using <code>spawn</code>.</p>
-</div>
-<div class="paragraph">
-<p>There two main way to <code>spawn</code> threads - we will need both:
-- using the block notation
-- using the method call notation</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_spawn_block_and_fiber_execution">1.2. Spawn Block and Fiber Execution</h3>
-<div class="paragraph">
-<p>A spawn block looks like:</p>
-</div>
-<div class="listingblock">
-<div class="title">src/concurrency/spawn_block.cr</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="linenums">puts "before spawn"
-spawn do
-  puts "within spawn"
-end
-puts "after spawn"
-
-# Fiber.yield</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Run with:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>get cli help</p>
+</li>
+</ul>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/concurrency/spawn_block.cr</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal -h</code></pre>
 </div>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">
-We don&#8217;t see the text <strong>within spawn</strong>
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>In order to get the main thread to let the Fiber run before ending we need to uncomment the <code>Fiber.yield</code> and run again - this tells the main thread to process the fibers on the <strong>main thread</strong> - later we will see there are other actions that trigger the <strong>main thread</strong> to yield to the Fibers.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_spawn_block_passes_values_when_fiber_executes">1.3. Spawn Block <em>(Passes Values when Fiber EXECUTES)</em></h3>
-<div class="paragraph">
-<p>Spawn block - uses the <strong>value at the time when the Fiber is executed</strong> - which can lead to unexpected results. Try the following code:</p>
-</div>
-<div class="listingblock">
-<div class="title">src/concurrency/spawn_block_unexpected.cr</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="crystal">i = 0
-puts "SYNC: i = 0 = #{i}"     # synchronous
-spawn do
-  puts "ASYNC: i = 0 = #{i}"  # asynchronous
-end
-
-i = 1
-puts "SYNC: i = 1 = #{i}"     # synchronous
-spawn do
-  puts "ASYNC: i = 1 = #{i}"  # asynchronous
-end
-
-Fiber.yield  # i = 1 when the main thread yields to the fibers!</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Run with:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>generate a new app:</p>
+</li>
+</ul>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/concurrency/spawn_block_unexpected.cr</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal init app project_name
+$ cd project_name</code></pre>
 </div>
 </div>
-</div>
-<div class="sect2">
-<h3 id="_spawn_block_with_procs_passes_values_when_fiber_spawned">1.4. Spawn Block with Procs <em>(Passes Values when Fiber SPAWNED)</em></h3>
-<div class="paragraph">
-<p>Because i = 1 at the time when the fibers execute '1' is printed twice - this is probably not desired in this case.  The solution is to use <code>Proc</code></p>
-</div>
-<div class="paragraph">
-<p>The solution is to define a proc which will pass the value at the time the <code>Proc</code> is called NOT when the <code>Fiber</code> is executed.</p>
-</div>
-<div class="paragraph">
-<p>This code works as expected, but is clumsy looking:</p>
-</div>
-<div class="listingblock">
-<div class="title">src/concurrency/spawn_proc.cr</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="crystal">i = 0
-puts "SYNC: i = 0 = #{i}"       # synchronous
-proc_0 = -&gt;(x : Int32) do
-  spawn do
-    puts "ASYNC: i = 0 = #{x}"  # asynchronous
-  end
-end
-proc_0.call(i)
-
-i = 1
-puts "SYNC: i = 1 = #{i}"       # synchronous
-proc_1 = -&gt;(x : Int32) do
-  spawn do
-    puts "ASYNC: i = 1 = #{x}"  # asynchronous
-  end
-end
-proc_1.call(i)
-
-Fiber.yield</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Run with:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>compile and run (while developing):</p>
+</li>
+</ul>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/concurrency/spawn_proc_block.cr</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal run src/code.cr</code></pre>
 </div>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">
-now all works well - but lots of code for 2 simple <code>puts</code> statements.
-</td>
-</tr>
-</table>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_spawn_method_call_simple_passing_values_at_spawn">1.5. Spawn Method Call <em>(simple passing values at spawn)</em></h3>
-<div class="paragraph">
-<p>A <strong>much nicer</strong> way to pass the value at the time of call&#8201;&#8212;&#8201;not at the time of execution is to use the <code>spawn</code> call:</p>
-</div>
-<div class="listingblock">
-<div class="title">src/concurrency/spawn_call.cr</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="crystal">i = 0
-puts "SYNC: i = 0 = #{i}"         # synchronous
-spawn puts "ASYNC: i = 0 = #{i}"  # asynchronous
-
-i = 1
-puts "SYNC: i = 1 = #{i}"         # synchronous
-spawn puts "ASYNC: i = 1 = #{i}"  # asynchronous
-
-Fiber.yield</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Run with:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>compile to executable and run:</p>
+</li>
+</ul>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/concurrency/spawn_call.cr</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal build src/file.cr
+$ ./file</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>This is syntactic sugar (a crystal <code>macro</code>) for <code>proc</code>-<code>spawn</code> technique shown above.  I find this syntax far more attractive and will be used for method calls from now on!</p>
+<div class="ulist">
+<ul>
+<li>
+<p>compile and optimize build (for release into the wild):</p>
+</li>
+</ul>
 </div>
-<div class="paragraph">
-<p>Just a reminder, notice how all async messages happen after <code>Fiber.yield</code></p>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal build --release src/file.cr -o new_name
+$ ./new_name</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>compile with Parallelism enabled (experimental) - <a href="https://crystal-lang.org/2019/09/06/parallelism-in-crystal.html" class="bare">https://crystal-lang.org/2019/09/06/parallelism-in-crystal.html</a></p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="bash">crystal build -Dpreview_mt code.cr -o code
+$ ./code                   # defaul is 4 workers
+$ CRYSTAL_WORKERS=2 ./code # uses two CPUS
+$ CRYSTAL_WORKERS=4 ./code # same as default</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>compile and run (all) specs:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal spec</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>build docs from code comments</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal docs</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p><strong><a href="index.html">Start Page</a></strong></p>
@@ -674,10 +588,9 @@ Fiber.yield</code></pre>
 </div>
 </div>
 </div>
-</div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-12 11:57:34 +0100
+Last updated 2020-01-12 12:43:19 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">

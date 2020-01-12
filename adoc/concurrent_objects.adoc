@@ -1,0 +1,96 @@
+= Crystal Lang Explorations -- Concurrency with Objects
+:source-highlighter: prettify
+:source-language: crystal
+Bill Tihen (Crystal 0.32.1)
+Version 0.0.1
+:sectnums:
+:toc:
+:toclevels: 4
+:toc-title: Contents
+
+:description: Exploring Crystal's Features
+:keywords: Crystal Language
+:imagesdir: ./images
+
+*link:index.html[Start Page]*
+
+Exploring & Learning Crystal Language with code examples and augment the documentation.
+
+.NOTE:
+****
+* The code is just good enough to demonstrate an idea.
+* This code does not focus on best practices, security nor being production ready.
+****
+
+== Fibers with Objects
+
+We `spawn` to other objects for concurrent processing.  This next code sample shows how to send both synchronous and asynchronous messages from the *main thread* to objects which will be evaluated within a `Fiber`.
+
+Here is our base `User` object:
+
+.src/concurrency/user.cr
+[source,linenums]
+----
+class User
+  getter channel : Channel(String)
+  private getter name : String, email : String
+
+  def initialize(@name, @email)
+    @channel = Channel(String).new
+  end
+
+  def to_s
+    "#{name} <#{email}>"
+  end
+
+  def post_message(message : String)
+    puts "To: #{to_s} -- #{message}"
+  end
+end
+----
+
+Code to send `user` messages:
+
+.src/concurrency/user_messaging.cr
+[source,linenums]
+----
+require "./user"     # autoloads the above user.cr file
+
+# USAGE
+module UserMessaging
+  # create users
+  user_1 = User.new(name: "first",  email: "first@example.ch")
+  user_2 = User.new(name: "second", email: "second@example.ch")
+
+  # send messages
+  puts "REAL-TIME - START"
+
+  # send an async message
+  spawn user_1.post_message("ASYNC sent 1st")
+
+  # send a synchronous message
+  user_1.post_message("REAL-TIME sent 2nd")
+  user_1.post_message("REAL-TIME sent 3rd")
+
+  puts "SWITCH to user_2"
+  spawn user_2.post_message("ASYNC sent 4th")
+  user_2.post_message("REAL-TIME sent 5th")
+
+  puts "SWITCH back to user_1"
+  user_1.post_message("REAL-TIME sent 6th")
+  spawn user_1.post_message("ASYNC sent 7th")
+  puts "REAL-TIME - DONE"
+
+  # Allow Fibers (async messages) to execute
+  Fiber.yield
+end
+----
+
+Run with:
+```bash
+$ crystal src/concurrency/spawn_call.cr
+```
+
+Just a reminder, notice how all async messages happen after `Fiber.yield`
+
+*link:index.html[Start Page]*

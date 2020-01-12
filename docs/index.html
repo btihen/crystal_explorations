@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
 <meta name="author" content="Bill Tihen (Crystal 0.32.1)">
-<title>Crystal Lang Explorations</title>
+<title>Crystal Lang Explorations&#8201;&#8212;&#8201;Start Page</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -439,7 +439,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
-<h1>Crystal Lang Explorations</h1>
+<h1>Crystal Lang Explorations&#8201;&#8212;&#8201;Start Page</h1>
 <div class="details">
 <span id="author" class="author">Bill Tihen (Crystal 0.32.1)</span><br>
 <span id="revdate">Version 0.0.1</span>
@@ -451,18 +451,20 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="paragraph">
 <p>Exploring &amp; Learning Crystal Language with code examples and augment the documentation.</p>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">
-This code does not focus on best practices, security or production ready code.<br>
-The code is just good enough to demonstrate what is happening.
-</td>
-</tr>
-</table>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">NOTE:</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The code is just good enough to demonstrate an idea.</p>
+</li>
+<li>
+<p>This code does not focus on best practices, security nor being production ready.</p>
+</li>
+</ul>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -484,34 +486,130 @@ The code is just good enough to demonstrate what is happening.
 </div>
 </div>
 <div class="sect2">
+<h3 id="_crystal_cli"><a href="crystal_cli.html">Crystal CLI</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Useful commands when using crystal</p>
+</li>
+<li>
+<p>My most useful command while developing is:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="crystal">crystal run src/file_name.cr</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
 <h3 id="_structs_records"><a href="structs_n_records.html">Structs &amp; Records</a></h3>
-
-</div>
-<div class="sect2">
-<h3 id="_crystal_cli"><a href="cli.html">Crystal CLI</a></h3>
-
-</div>
-<div class="sect2">
-<h3 id="_concurrency"><a href="concurrency.html">Concurrency</a></h3>
-<div class="paragraph">
-<p>TODO: review, augment and adapt content using: <a href="https://blog.golang.org/pipelines" class="bare">https://blog.golang.org/pipelines</a></p>
+<div class="ulist">
+<ul>
+<li>
+<p>Structs <em>(&amp; Records)</em> are immutable data structures - these are <code>safe</code> when used in a concurrent/parallel context.</p>
+</li>
+</ul>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_channels"><a href="channels.html">Channels</a></h3>
-
+<h3 id="_concurrency"><a href="concurrency_basics.html">Concurrency</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Basics on starting processes concurrently</p>
+</li>
+</ul>
+</div>
 </div>
 <div class="sect2">
-<h3 id="_channel_callbacks"><a href="channel_callbacks.html">Channel Callbacks</a></h3>
-
+<h3 id="_concurrent_objects"><a href="concurrent_objects.html">Concurrent Objects</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Examples of using concurrency with objects</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_channel_basics"><a href="channel_basics.html">Channel Basics</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Channels allow us to safely communicate between concurrent processes.</p>
+</li>
+<li>
+<p>To safely share data/state send immutable data only <strong>(Structs are a good option)</strong>.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Share the smallest possible data structure - large data structures will be slow to copy.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_concurrent_state_sharing"><a href="channel_callbacks.html">Concurrent State Sharing</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Safely share state information when its available</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_channel_buffers"><a href="channel_buffers.html">Channel Buffers</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Handling async message queues</p>
+</li>
+</ul>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_parallelism">Parallelism</h3>
-
+<div class="ulist">
+<ul>
+<li>
+<p>Compiling to use multiple CPUs</p>
+</li>
+</ul>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_macros">Macros</h3>
-
+<div class="ulist">
+<ul>
+<li>
+<p>Crystal&#8217;s answer to Meta-programming</p>
+</li>
+<li>
+<p>Using macros to reduce boiler-plate and build a simple <strong>Actor Model</strong></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_concurrency_using_the_actor_model">Concurrency using the <strong>Actor Model</strong></h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Using macros to build async message sending, callbacks and state sharing.</p>
+</li>
+</ul>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_resources">Resources</h3>
@@ -538,6 +636,16 @@ The code is just good enough to demonstrate what is happening.
 </div>
 </div>
 <div class="sect2">
+<h3 id="_todo">TODO:</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>review, augment and adapt content using: <a href="https://blog.golang.org/pipelines" class="bare">https://blog.golang.org/pipelines</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
 <h3 id="_corrections_improvements">Corrections &amp; Improvements</h3>
 <div class="ulist">
 <ul>
@@ -555,7 +663,7 @@ The code is just good enough to demonstrate what is happening.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-05 20:53:52 +0100
+Last updated 2020-01-12 12:42:42 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">

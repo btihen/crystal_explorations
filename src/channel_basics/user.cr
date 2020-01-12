@@ -1,4 +1,4 @@
-# src/simple_channels/user.cr
+# src/channel_basics/user.cr
 
 class User
   getter channel : Channel(String)

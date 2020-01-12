@@ -1,0 +1,40 @@
+= Crystal Lang Explorations -- Safe Concurrent Messaging
+:source-highlighter: prettify
+:source-language: crystal
+Bill Tihen (Crystal 0.32.1)
+Version 0.0.1
+:sectnums:
+:toc:
+:toclevels: 4
+:toc-title: Contents
+
+:description: Exploring Crystal's Features
+:keywords: Crystal Language
+:imagesdir: ./images
+
+*link:index.html[Start Page]*
+
+Exploring & Learning Crystal Language with code examples and augment the documentation.
+
+.NOTE:
+****
+* The code is just good enough to demonstrate an idea.
+* This code does not focus on best practices, security nor being production ready.
+****
+
+== Structs
+
+These are flexible immutable data types. Thus ideal for sending `safe` data between Fibers via Channels.
+
+Here might be a Message struct that could be used within a chat system:
+
+
+
+```
+record Message, sender : User, text : String, topic : String = "", receiver : User? = nil
+
+message = Message.new(bill, "Hi there")
+# => Message(sender: "bill <bill@example.com", text: "Hi there", topic: "", receiver: nil)
+```
+
+*link:index.html[Start Page]*

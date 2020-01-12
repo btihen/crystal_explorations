@@ -1,77 +1,174 @@
-@plambert nope, with a NamedTuple you always have to supply all of the fields. Maybe you should think about using a record instead?
+= Crystal Lang Explorations -- Structs and Records
+:source-highlighter: prettify
+:source-language: crystal
+Bill Tihen (Crystal 0.32.1)
+Version 0.0.1
+:sectnums:
+:toc:
+:toclevels: 4
+:toc-title: Contents
 
-@watzon
-```
-record Foo, id : Int32, name : String? = nil
+:description: Exploring Crystal's Features
+:keywords: Crystal Language
+:imagesdir: ./images
 
-foo = Foo.new(32)
-# => Foo(id: 32, name: nil)
-```
-@watzon ooh. how is a record different from a struct?
+*link:index.html[Start Page]*
 
-It's just a simplified syntax for creating a Struct with a default initializer
-also defines getters and some ways to copy it
+Exploring & Learning Crystal Language with code examples and augment the documentation.
 
-You can also do
-```
-record Foo, name : String, id : Int32 do
-  def do_something
+.NOTE:
+****
+* The code is just good enough to demonstrate an idea.
+* This code does not focus on best practices, security nor being production ready.
+****
+
+== Structs
+
+Structs (& Records) are basically classes, but:
+* they are immutable (once created they aren't changed)
+* they are passed by VALUE not by REFERENCE (this means the data is COPIED)
+
+.NOTE:
+****
+* Immutability makes Structs (& Records) safe to pass between Fibers via Channels.
+* Given structs are COPIED - very large structures may slow-down your code and use a lot of memory.
+****
+
+I like to think of these as flexible immutable data types - with very few if any methods.  These are a great way to pass data between classes (safely - async or sync).
+
+To demonstrate Structs and Records - lets assume we have a User class that can receive messages posted to it.  We will create an immutable struct for passing the messages.
+
+.src/structs_n_records/user.cr
+[source,linenums]
+----
+require "./message_record"
+
+class User
+  private getter name : String, email : String
+
+  def initialize(@name, @email)
+  end
+
+  def to_s
+    "#{name} <#{email}>"
+  end
+
+  def post_message(message : Message)
+    puts message.to_s
   end
 end
+----
+
+Here is the simplest possible Struct (that might be used to send messages to users).
+
+.src/structs_n_records/message_struct_simple.cr
+[source,linenums]
+----
+require "./user"
+
+struct MessageStruct
+  getter sender : User, receiver : User?, topic : String, text : String
+
+  def initialize(@sender  : User, @text : String, @receiver : User? = nil, @topic : String? = nil)
+    @text = text.strip
+  end
+end
+----
+
+Structs can also have a method (generally, I like to create `to_s` methods) - in this case the struct would look like:
+
+.src/structs_n_records/message_struct.cr
+[source,linenums]
+----
+require "./user"
+
+struct Message
+  getter sender : User, receiver : User?, topic : String, text : String
+
+  def initialize(@sender  : User, @text : String, @receiver : User? = nil, @topic : String = "")
+    @text = text.strip
+    @topic = topic.strip
+  end
+
+  def to_s
+    output = [] of String
+    output << "-" * 30
+    output << "From: #{sender.to_s}"
+    output << "To: #{receiver.to_s}"  unless receiver.nil?
+    output << "Topic: #{topic}"       unless topic == ""
+    output << text.strip
+    output << "-" * 30
+    output.join("\n")
+  end
+end
+
+user_1 = User.new(name: "user_1", email: "user_1@example.com")
+user_2 = User.new(name: "user_2", email: "user_2@example.com")
+
+mesg_1 = Message.new(sender: user_2, text: "Hi")
+mesg_2 = Message.new(sender: user_1, text: "Hoi", topic: "Greet")
+mesg_3 = Message.new(sender: user_1, text: "Hoi", topic: "Greet", receiver: user_2)
+
+user_1.post_message(mesg_1)
+user_2.post_message(mesg_2)
+user_2.post_message(mesg_3)
+----
+
+Run this using:
+
+```bash
+$ crystal src/structs_n_records/message_struct.cr
 ```
 
 ## Records
 
-Records are a simplified way to create a Struct _(they have default initializer)._
+Records are a simplified way to create a Struct _(they have default initializer and getters)._
 
-**Record Definitions**
+Thus the simplest Record definition looks like:
+
 ```
-record Foo, id : Int32, name : String
+record(Message, sender : User, text : String, receiver : User? = nil, topic : String? = nil)
 # or
-record(Foo, id : Int32, name : String)
+record Message, sender : User, text : String, receiver : User? = nil, topic : String? = nil
 ```
 
-Like structs, records can also have custom behaviors - defined with:
-```
-record(Foo, name : String, id : Int32) do
+Assuming you want a custom method then the record looks like:
+
+.src/structs_n_records/message_record.cr
+[source,linenums]
+----
+require "./user"
+
+record(Message, sender : User,          text : String,
+                receiver : User? = nil, topic : String = "") do
   def to_s
-    puts "Foo: id: #{id}; name: #{name}"
+    output = [] of String
+    output << "-" * 30
+    output << "From: #{sender.to_s}"
+    output << "To: #{receiver.to_s}"  unless receiver.nil?
+    output << "Topic: #{topic.to_s.strip}"
+    output << text.strip
+    output << "-" * 30
+    output.join("\n")
   end
 end
+
+user_1 = User.new(name: "user_1", email: "user_1@example.com")
+user_2 = User.new(name: "user_2", email: "user_2@example.com")
+
+mesg_1 = Message.new(sender: user_2, text: "Hi")
+mesg_2 = Message.new(sender: user_1, text: "Hoi", topic: "Greet")
+mesg_3 = Message.new(sender: user_1, text: "Hoi", topic: "Greet", receiver: user_2)
+
+user_1.post_message(mesg_1)
+user_2.post_message(mesg_2)
+user_2.post_message(mesg_3)
+----
+
+Run this using:
+
+```bash
+$ crystal src/structs_n_records/message_record.cr
 ```
 
-Records can be a flexible data structure (tuples and others require a fixed data structure - without `nil`s).
-
-For example if you need a simple data structure that may or maynot have all the data you can define a record with the following parameters `name : String? = nil`
-```
-record Foo, id : Int32, name : String? = nil do
-  def to_s
-    puts "Foo: id: #{id}; name: #{name}"
-  end
-end
-```
-
-**Record Usage:**
-Record assignment is done using:
-```
-foo1 = Foo.new(1)
-# => Foo(id: 1, name: nil)
-foo2 = Foo.new(2, "Bar")
-# => Foo(id: 2, name: "Bar")
-```
-
-Record usage looks like:
-```
-puts "id: #{foo1.id}"
-# => id: 1
-puts "name: #{foo1.name}"
-# => name:
-puts foo1.to_s
-# => Foo: id: 1; name:
-puts "id: #{foo2.id}"
-# => id: 2
-puts "name: #{foo2.name}"
-# => name: Bar
-puts foo2.to_s
-# => Foo: id: 2; name: Bar
-```
+As you can see there is fundamentally no difference between Structs and Records - just simplified setup.

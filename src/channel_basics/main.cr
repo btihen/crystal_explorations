@@ -1,4 +1,4 @@
-# src/simple_channels/main.cr
+# src/channel_basics/main.cr
 
 require "./user"
 

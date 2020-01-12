@@ -14,14 +14,6 @@ Version 0.0.1
 
 *link:index.html[Start Page]*
 
-Exploring & Learning Crystal Language with code examples and augment the documentation.
-
-.NOTE:
-****
-* The code is just good enough to demonstrate an idea.
-* This code does not focus on best practices, security nor being production ready.
-****
-
 == Fibers with Objects
 
 We `spawn` to other objects for concurrent processing.  This next code sample shows how to send both synchronous and asynchronous messages from the *main thread* to objects which will be evaluated within a `Fiber`.

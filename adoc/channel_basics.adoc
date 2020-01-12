@@ -14,14 +14,6 @@ Version 0.0.1
 
 *link:index.html[Start Page]*
 
-Exploring & Learning Crystal Language with code examples and augment the documentation.
-
-.NOTE:
-****
-* The code is just good enough to demonstrate an idea.
-* This code does not focus on best practices, security nor being production ready.
-****
-
 == Channels
 
 Channels are how Crystal communicates between Fibers.  Crystal Channels are based on the CSP model (Communicating with Sequential Processes), which basically, the messages arrive are are handled strickly sequentially.  The order in which messages by the receiving object are handled in the same order they enter the channel queue (FIFO - First-In First-Out).

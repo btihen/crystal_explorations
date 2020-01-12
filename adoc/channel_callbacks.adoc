@@ -15,14 +15,6 @@ Version 0.0.1
 
 *link:index.html[Start Page]*
 
-Exploring & Learning Crystal Language with code examples and augment the documentation.
-
-.NOTE:
-****
-* The code is just good enough to demonstrate an idea.
-* This code does not focus on best practices, security nor being production ready.
-****
-
 == Call-Back Channels
 
 When we no longer need to communicate with a `User` we are keeping the channel open - which won't allow the garbage collector to remove unused instances.

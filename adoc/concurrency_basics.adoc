@@ -14,14 +14,6 @@ Version 0.0.1
 
 *link:index.html[Start Page]*
 
-Exploring & Learning Crystal Language with code examples and augment the documentation.
-
-.NOTE:
-****
-* The code is just good enough to demonstrate an idea.
-* This code does not focus on best practices, security nor being production ready.
-****
-
 == Concurrency
 
 By default when crystal code launches a *main thread* is created for the running code, a separate thread is created for the *garbage collector*, and an *Event Loop* to handle IO waits - allowing the main thread to continue while waiting for slow IO calls to finish.

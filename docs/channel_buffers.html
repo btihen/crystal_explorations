@@ -447,7 +447,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toc" class="toc">
 <div id="toctitle">Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_call_back_channels">1. Call-Back Channels</a></li>
+<li><a href="#_channel_buffers">1. Channel Buffers</a></li>
 </ul>
 </div>
 </div>
@@ -460,34 +460,57 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect1">
-<h2 id="_call_back_channels">1. Call-Back Channels</h2>
+<h2 id="_channel_buffers">1. Channel Buffers</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>When we no longer need to communicate with a <code>User</code> we are keeping the channel open - which won&#8217;t allow the garbage collector to remove unused instances.</p>
+<p>Channel Buffers allow us to collect Channel Messages until they can be scheduled.</p>
 </div>
 <div class="paragraph">
-<p>Ideally, we will close the channels when we are done and we can even use that info to know if we can end our <strong>main thread</strong> (program).</p>
-</div>
-<div class="paragraph">
-<p>@stnluu_twitter &amp; @randiaz95 - I have two versions of using channels and fibers at: <a href="https://github.com/btihen/crystal_channels" class="bare">https://github.com/btihen/crystal_channels</a> - It works pretty well. I next want to figure out how to create multiple TCP or windows (one for each user). I realized when doing the chat room - using one thread works well - but compiliing with multiple cores - outputting to one screen gets jumbled again. I&#8217;ll happily learn more about multiple connections (I assume I need to use TCP sockets) - could I also use OS sockets?</p>
-</div>
-<div class="paragraph">
-<p>who is doing the output to screen?
-remember yesterday, we discussed about ideally, there&#8217;s a "room" object that keeps track of all the users, and does the job of broadcasting the message–instead of each user keeping track of all the other users?
-ideally, this "room" object should be the one doing the output to screen, aka only one fiber doing the output.</p>
-</div>
-<div class="paragraph">
-<p>from @repomaa</p>
+<p>An unbuffered channel is instantiated with:</p>
 </div>
 <div class="listingblock">
-<div class="title">src/channel_callbacks/user.cr</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="crystal">@channel = Channel(String).new</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>which is the equivalent of:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="crystal">@channel = Channel(String).new(1)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A Message buffer of 1 (the channel holds at the MOST 1 message at a time.</p>
+</div>
+<div class="paragraph">
+<p>To create a Channel with a buffer of 3 messages use:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="crystal">@channel = Channel(String).new(3)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To demonstrate this lets overwhelm our message bus with the below code.
+To trigger a problem do the following in this order with an Unbuffered Channel.
+Send many:
+* many synchronous messages
+* many asynchronous messages
+* then close the channels</p>
+</div>
+<div class="listingblock">
+<div class="title">src/channel_buffers/main_buffers.cr</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="linenums">class User
-  getter channel : Channel(String)
-  private getter name : String, email : String, status : Channel(Nil)
+  getter  channel : Channel(String)
+  private getter name : String, email : String
 
-  def initialize(@name, @email, @status)
-    @channel = Channel(String).new
+  def initialize(@name, @email)
+    # @channel = Channel(String).new(3)  # buffered - holds 3 messages
+    # @channel = Channel(String).new(1)  # unbuffered - holds 1 message
+    @channel = Channel(String).new       # unbuffered - holds 1 message
     listen_for_messages
   end
 
@@ -503,93 +526,42 @@ ideally, this "room" object should be the one doing the output to screen, aka on
 
         puts "To: #{to_s} -- #{message}"
       end
-      status.send(nil)   # loop ends when channels closes - send close status
     end
   end
-end</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="title">src/channel_callbacks/main.cr</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="linenums">require "./user"
+end
 
-# create users
-status = Channel(Nil).new
-user_1 = User.new(name: "first",  email: "first@example.ch", status: status)
-user_2 = User.new(name: "second", email: "second@example.ch", status: status)
-
-puts "REAL-TIME - START"
-spawn user_1.channel.send("ASYNC sent 1st!")
-user_1.channel.send("REAL-TIME sent 2nd!")
-spawn user_1.channel.send("ASYNC sent 3th!")
-user_2.channel.send("REAL-TIME sent 4th!")
-spawn user_2.channel.send("ASYNC sent 5th!")
-user_1.channel.send("REAL-TIME sent 6th!")
-puts "REAL-TIME - DONE"
-user_1.channel.close
-user_2.channel.close
-
-2.times { status.receive }</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Run with:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/channel_callbacks/main.cr</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Now we can wait for all channels to close.</p>
-</div>
-<div class="paragraph">
-<p>Below shows code that allows us to track users 'registered' in the <code>users</code> array (we remove users when they close their channel)</p>
-</div>
-<div class="listingblock">
-<div class="title">src/channel_callbacks/main_stress.cr</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="linenums">require "./user"
-
-module MainStress
-
-  # make callback status channel
-  status = Channel(User).new
-
+module MainBuffers
   # make a large number of users
   users  = [] of User
-
-  10000.times do |i|
-    user = User.new(name: "user_#{i}", email: "user_#{i}@example.ch", status: status)
+  1000.times do |i|
+    user = User.new(name: "user_#{i}",  email: "user_#{i}@example.ch")
     users &lt;&lt; user
   end
 
-  # send lots of messages - async (for some reason async needs to be first)
+  # sending many sync and async ensures more messages than secondary fibers can handle without a buffer
   users.each do |receiver|
-    spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
+    # synchronous messaging
+    receiver.channel.send("SYNC 0 -- From: #{receiver.to_s} - with channel")
+    # # synchronous messaging
+    # spawn receiver.channel.send("SYNC 2 -- From: #{receiver.to_s} - with channel")
   end
 
-  # send lots of messages - async (for some reason async needs to be first)
+  # sending many sync and async ensures more messages than secondary fibers can handle without a buffer
   users.each do |receiver|
-    spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
+    # async messaging
+    spawn receiver.channel.send("ASYNC 3 -- From: #{receiver.to_s} - with channel")
   end
 
-  # close asynchronously to allow messages to be delivered
+  # close user channels
   users.each do |receiver|
+    # close asynchronously to allow messages to be delivered
     spawn receiver.channel.close
   end
 
-  # wait for all channels close - which 'unregisters' a user from `users`
-  #######
-  # we can also do this and 'unscribe' users when they close their channels
-  # ideally this would also run within a listener (and not in a loop)
-  while users.size &gt; 0
-    user   = status.receive?
-    break if user.nil?
-
-    users.delete(user)
-    puts "CLOSED: #{user.to_s}"
+  # wait for all channels to close before allowing main to terminate
+  loop do
+    break if users.all?{ |u| u.channel.closed? } # are all channels are closed?
+    Fiber.yield
   end
 end</code></pre>
 </div>
@@ -599,12 +571,40 @@ end</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/channel_callbacks/main_stress.cr</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/channel_buffers/main_buffers.cr</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>@stnluu_twitter
-Fix for the stress testing is buffering when switching back and forth between sync and async.</p>
+<p>Running this you will see many errors:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="crystal">Unhandled exception in spawn: Channel is closed (Channel::ClosedError)
+  from /usr/local/Cellar/crystal/0.32.1/src/channel.cr:224:9 in 'send'
+  from src/channel_buffers/main_buffers.cr:50:11 in '-&gt;'
+  from /usr/local/Cellar/crystal/0.32.1/src/fiber.cr:255:3 in 'run'
+  from /usr/local/Cellar/crystal/0.32.1/src/fiber.cr:47:34 in '-&gt;'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We start to close the channels before the message bus is empty.</p>
+</div>
+<div class="paragraph">
+<p>To easily fix this simply change the user code initializer to:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="crystal">def initialize(@name, @email)
+  @channel = Channel(String).new(3)
+  listen_for_messages
+end</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now rerun the code.</p>
+</div>
+<div class="paragraph">
+<p>The errors should now be gone &amp; we can successfully message many users synchronously and asynchronously.</p>
 </div>
 <div class="paragraph">
 <p><strong><a href="index.html">Start Page</a></strong></p>
@@ -614,7 +614,7 @@ Fix for the stress testing is buffering when switching back and forth between sy
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-12 20:51:50 +0100
+Last updated 2020-01-14 21:22:30 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">

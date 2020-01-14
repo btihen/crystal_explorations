@@ -1,4 +1,4 @@
-= Crystal Lang Explorations -- Channel Callbacks
+= Crystal Lang Explorations -- Async State Sharing
 :source-highlighter: prettify
 :source-language: crystal
 Bill Tihen (Crystal 0.32.1)

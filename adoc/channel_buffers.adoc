@@ -15,31 +15,43 @@ Version 0.0.1
 
 *link:index.html[Start Page]*
 
-== Call-Back Channels
+== Channel Buffers
 
-When we no longer need to communicate with a `User` we are keeping the channel open - which won't allow the garbage collector to remove unused instances.
+Channel Buffers allow us to collect Channel Messages until they can be scheduled.
 
-Ideally, we will close the channels when we are done and we can even use that info to know if we can end our *main thread* (program).
+An unbuffered channel is instantiated with:
+```
+@channel = Channel(String).new
+```
+which is the equivalent of:
+```
+@channel = Channel(String).new(1)
+```
+A Message buffer of 1 (the channel holds at the MOST 1 message at a time.
 
+To create a Channel with a buffer of 3 messages use:
+```
+@channel = Channel(String).new(3)
+```
 
-@stnluu_twitter & @randiaz95 - I have two versions of using channels and fibers at: https://github.com/btihen/crystal_channels - It works pretty well. I next want to figure out how to create multiple TCP or windows (one for each user). I realized when doing the chat room - using one thread works well - but compiliing with multiple cores - outputting to one screen gets jumbled again. I'll happily learn more about multiple connections (I assume I need to use TCP sockets) - could I also use OS sockets?
+To demonstrate this lets overwhelm our message bus with the below code.
+To trigger a problem do the following in this order with an Unbuffered Channel.
+Send many:
+* many synchronous messages
+* many asynchronous messages
+* then close the channels
 
-who is doing the output to screen?
-remember yesterday, we discussed about ideally, there's a "room" object that keeps track of all the users, and does the job of broadcasting the message–instead of each user keeping track of all the other users?
-ideally, this "room" object should be the one doing the output to screen, aka only one fiber doing the output.
-
-
-from @repomaa
-
-.src/channel_callbacks/user.cr
+.src/channel_buffers/main_buffers.cr
 [source,linenums]
 ----
 class User
-  getter channel : Channel(String)
-  private getter name : String, email : String, status : Channel(Nil)
+  getter  channel : Channel(String)
+  private getter name : String, email : String
 
-  def initialize(@name, @email, @status)
-    @channel = Channel(String).new
+  def initialize(@name, @email)
+    # @channel = Channel(String).new(3)  # buffered - holds 3 messages
+    # @channel = Channel(String).new(1)  # unbuffered - holds 1 message
+    @channel = Channel(String).new       # unbuffered - holds 1 message
     listen_for_messages
   end
 
@@ -55,98 +67,70 @@ class User
 
         puts "To: #{to_s} -- #{message}"
       end
-      status.send(nil)   # loop ends when channels closes - send close status
     end
   end
 end
-----
 
-.src/channel_callbacks/main.cr
-[source,linenums]
-----
-require "./user"
-
-# create users
-status = Channel(Nil).new
-user_1 = User.new(name: "first",  email: "first@example.ch", status: status)
-user_2 = User.new(name: "second", email: "second@example.ch", status: status)
-
-puts "REAL-TIME - START"
-spawn user_1.channel.send("ASYNC sent 1st!")
-user_1.channel.send("REAL-TIME sent 2nd!")
-spawn user_1.channel.send("ASYNC sent 3th!")
-user_2.channel.send("REAL-TIME sent 4th!")
-spawn user_2.channel.send("ASYNC sent 5th!")
-user_1.channel.send("REAL-TIME sent 6th!")
-puts "REAL-TIME - DONE"
-user_1.channel.close
-user_2.channel.close
-
-2.times { status.receive }
-----
-
-Run with:
-```bash
-$ crystal src/channel_callbacks/main.cr
-```
-
-Now we can wait for all channels to close.
-
-Below shows code that allows us to track users 'registered' in the `users` array (we remove users when they close their channel)
-
-.src/channel_callbacks/main_stress.cr
-[source,linenums]
-----
-require "./user"
-
-module MainStress
-
-  # make callback status channel
-  status = Channel(User).new
-
+module MainBuffers
   # make a large number of users
   users  = [] of User
-
-  10000.times do |i|
-    user = User.new(name: "user_#{i}", email: "user_#{i}@example.ch", status: status)
+  1000.times do |i|
+    user = User.new(name: "user_#{i}",  email: "user_#{i}@example.ch")
     users << user
   end
 
-  # send lots of messages - async (for some reason async needs to be first)
+  # sending many sync and async ensures more messages than secondary fibers can handle without a buffer
   users.each do |receiver|
-    spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
+    # synchronous messaging
+    receiver.channel.send("SYNC 0 -- From: #{receiver.to_s} - with channel")
+    # # synchronous messaging
+    # spawn receiver.channel.send("SYNC 2 -- From: #{receiver.to_s} - with channel")
   end
 
-  # send lots of messages - async (for some reason async needs to be first)
+  # sending many sync and async ensures more messages than secondary fibers can handle without a buffer
   users.each do |receiver|
-    spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
+    # async messaging
+    spawn receiver.channel.send("ASYNC 3 -- From: #{receiver.to_s} - with channel")
   end
 
-  # close asynchronously to allow messages to be delivered
+  # close user channels
   users.each do |receiver|
+    # close asynchronously to allow messages to be delivered
     spawn receiver.channel.close
   end
 
-  # wait for all channels close - which 'unregisters' a user from `users`
-  #######
-  # we can also do this and 'unscribe' users when they close their channels
-  # ideally this would also run within a listener (and not in a loop)
-  while users.size > 0
-    user   = status.receive?
-    break if user.nil?
-
-    users.delete(user)
-    puts "CLOSED: #{user.to_s}"
+  # wait for all channels to close before allowing main to terminate
+  loop do
+    break if users.all?{ |u| u.channel.closed? } # are all channels are closed?
+    Fiber.yield
   end
 end
 ----
 
 Run with:
 ```bash
-$ crystal src/channel_callbacks/main_stress.cr
+$ crystal src/channel_buffers/main_buffers.cr
 ```
 
-@stnluu_twitter
-Fix for the stress testing is buffering when switching back and forth between sync and async.
+Running this you will see many errors:
+```
+Unhandled exception in spawn: Channel is closed (Channel::ClosedError)
+  from /usr/local/Cellar/crystal/0.32.1/src/channel.cr:224:9 in 'send'
+  from src/channel_buffers/main_buffers.cr:50:11 in '->'
+  from /usr/local/Cellar/crystal/0.32.1/src/fiber.cr:255:3 in 'run'
+  from /usr/local/Cellar/crystal/0.32.1/src/fiber.cr:47:34 in '->'
+```
+We start to close the channels before the message bus is empty.
+
+To easily fix this simply change the user code initializer to:
+```
+def initialize(@name, @email)
+  @channel = Channel(String).new(3)
+  listen_for_messages
+end
+```
+Now rerun the code.
+
+The errors should now be gone & we can successfully message many users synchronously and asynchronously.
 
 *link:index.html[Start Page]*

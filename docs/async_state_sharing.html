@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
 <meta name="author" content="Bill Tihen (Crystal 0.32.1)">
-<title>Crystal Lang Explorations&#8201;&#8212;&#8201;Start Page</title>
+<title>Crystal Lang Explorations&#8201;&#8212;&#8201;Async State Sharing</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -439,7 +439,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
-<h1>Crystal Lang Explorations&#8201;&#8212;&#8201;Start Page</h1>
+<h1>Crystal Lang Explorations&#8201;&#8212;&#8201;Async State Sharing</h1>
 <div class="details">
 <span id="author" class="author">Bill Tihen (Crystal 0.32.1)</span><br>
 <span id="revdate">Version 0.0.1</span>
@@ -447,36 +447,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toc" class="toc">
 <div id="toctitle">Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_installation">1. Installation</a></li>
-<li><a href="#_crystal_cli">2. Crystal CLI</a></li>
-<li><a href="#_structs_records">3. Structs &amp; Records</a>
-<ul class="sectlevel2">
-<li><a href="#_structs">3.1. Structs</a></li>
-<li><a href="#_records">3.2. Records</a></li>
-</ul>
-</li>
-<li><a href="#_macros">4. Macros</a></li>
-<li><a href="#_design_patterns">5. Design Patterns</a>
-<ul class="sectlevel2">
-<li><a href="#_decorator">5.1. Decorator</a></li>
-<li><a href="#_value_objects_pass_values_with_a_context">5.2. Value Objects (pass values with a context)</a></li>
-</ul>
-</li>
-<li><a href="#_concurrency_parallelism">6. Concurrency &amp; Parallelism</a>
-<ul class="sectlevel2">
-<li><a href="#_concurrency_basics">6.1. Concurrency Basics</a></li>
-<li><a href="#_concurrent_objects">6.2. Concurrent Objects</a></li>
-<li><a href="#_channels_async_messaging">6.3. Channels <em>(Async Messaging)</em></a></li>
-<li><a href="#_channel_buffers">6.4. Channel Buffers</a></li>
-<li><a href="#_async_state_sharing">6.5. Async State Sharing</a></li>
-<li><a href="#_parallelism">6.6. Parallelism</a></li>
-<li><a href="#_actor_model">6.7. Actor Model</a></li>
-</ul>
-</li>
-<li><a href="#_to_dos">7. TO-DOs</a></li>
-<li><a href="#_resources">8. Resources</a></li>
-<li><a href="#_generating_these_docs">9. Generating these Docs</a></li>
-<li><a href="#_corrections_improvements">10. Corrections &amp; Improvements</a></li>
+<li><a href="#_channel_callbacks">1. Channel Callbacks</a></li>
 </ul>
 </div>
 </div>
@@ -484,294 +455,157 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Exploring &amp; Learning Crystal Language with code examples and augment the documentation.</p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="title">NOTE:</div>
-<div class="ulist">
-<ul>
-<li>
-<p>The code is just good enough to demonstrate an idea.</p>
-</li>
-<li>
-<p>This code does not focus on best practices, security nor being production ready.</p>
-</li>
-</ul>
-</div>
-</div>
+<p><strong><a href="index.html">Start Page</a></strong></p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_installation">1. Installation</h2>
+<h2 id="_channel_callbacks">1. Channel Callbacks</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>On MacOS - use:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">$ brew install crystal</code></pre>
-</div>
+<p>When we no longer need to communicate with a <code>User</code> we are keeping the channel open - which won&#8217;t allow the garbage collector to remove unused instances.</p>
 </div>
 <div class="paragraph">
-<p>For all other systems see: <a href="https://crystal-lang.org/install/" class="bare">https://crystal-lang.org/install/</a></p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_crystal_cli">2. <a href="crystal_cli.html">Crystal CLI</a></h2>
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>Useful commands when using crystal</p>
-</li>
-<li>
-<p>My most useful command while developing is:</p>
-</li>
-</ul>
+<p>Ideally, we will close the channel, remove the user from the chat registry and only close the chat after all messages are delivered.</p>
 </div>
 <div class="listingblock">
+<div class="title">src/channel_callbacks/user.cr</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="crystal">crystal run src/file_name.cr</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_structs_records">3. Structs &amp; Records</h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_structs">3.1. <a href="structs.html">Structs</a></h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Structs <em>(&amp; Records)</em> are immutable data structures - these are <code>safe</code> when used in a concurrent/parallel context.</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_records">3.2. <a href="records.html">Records</a></h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Structs <em>(&amp; Records)</em> are immutable data structures - these are <code>safe</code> when used in a concurrent/parallel context.</p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_macros">4. Macros</h2>
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>Crystal&#8217;s answer to Meta-programming</p>
-</li>
-<li>
-<p>Using macros to reduce boiler-plate and build a simple <strong>Actor Model</strong></p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_design_patterns">5. Design Patterns</h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_decorator">5.1. Decorator</h3>
+<pre class="prettyprint highlight"><code data-lang="linenums">class User
+  getter channel : Channel(String)
+  private getter name : String, email : String, sign_out : Channel(User)
 
+  def initialize(@name, @email, @status)
+    @channel = Channel(String).new(2)
+    listen_for_messages
+  end
+
+  def to_s
+    "#{name} &lt;#{email}&gt;"
+  end
+
+  private def listen_for_messages
+    spawn do
+      loop do
+        message = channel.receive?
+        break     if message.nil?
+
+        puts "To: #{to_s} -- #{message}"
+      end
+      puts "#{to_s} -- CLOSING"
+      sign_out.send(self)   # loop ends when channels closes - send close status
+    end
+  end
+end</code></pre>
 </div>
-<div class="sect2">
-<h3 id="_value_objects_pass_values_with_a_context">5.2. Value Objects (pass values with a context)</h3>
-<div class="sidebarblock">
+</div>
+<div class="listingblock">
+<div class="title">src/channel_callbacks/main.cr</div>
 <div class="content">
-<div class="title">TODO</div>
+<pre class="prettyprint highlight"><code data-lang="linenums">require "./user"
+
+# create users
+status = Channel(User).new
+
+user_1 = User.new(name: "first",  email: "first@example.ch", status: status)
+user_2 = User.new(name: "second", email: "second@example.ch", status: status)
+
+puts "REAL-TIME - START"
+spawn user_1.channel.send("ASYNC sent 1st!")
+user_1.channel.send("REAL-TIME sent 2nd!")
+spawn user_1.channel.send("ASYNC sent 3th!")
+user_2.channel.send("REAL-TIME sent 4th!")
+spawn user_2.channel.send("ASYNC sent 5th!")
+user_1.channel.send("REAL-TIME sent 6th!")
+puts "REAL-TIME - DONE"
+user_1.channel.close
+user_2.channel.close
+
+2.times { status.receive }</code></pre>
+</div>
+</div>
 <div class="paragraph">
-<p>Check if Crystal structs have built in value comparisons or if those need to be added to build a proper <strong>Value Object</strong></p>
+<p>Run with:</p>
 </div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_concurrency_parallelism">6. Concurrency &amp; Parallelism</h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_concurrency_basics">6.1. <a href="concurrency_basics.html">Concurrency Basics</a></h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Basics on starting processes concurrently</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_concurrent_objects">6.2. <a href="concurrent_objects.html">Concurrent Objects</a></h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Examples of using concurrency with objects</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_channels_async_messaging">6.3. <a href="channels_async_messaging.html">Channels <em>(Async Messaging)</em></a></h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Channels allow us to safely communicate between concurrent processes.</p>
-</li>
-<li>
-<p>To safely share data/state send immutable data only <strong>(Structs are a good option)</strong>.</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_channel_buffers">6.4. <a href="channel_buffers.html">Channel Buffers</a></h3>
-<div class="ulist">
-<ul>
-<li>
-<p>What to do when messages come faster than collected</p>
-</li>
-</ul>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">
-Share the smallest possible data structure - large data structures will be slow to copy.
-</td>
-</tr>
-</table>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_async_state_sharing">6.5. <a href="async_state_sharing.html">Async State Sharing</a></h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Safely share state information when its available</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_parallelism">6.6. Parallelism</h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Compiling to use multiple CPUs</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_actor_model">6.7. Actor Model</h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Using macros to build async message sending, callbacks and state sharing.</p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_to_dos">7. TO-DOs</h2>
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>Add Macros</p>
-</li>
-<li>
-<p>Write Channel Buffering</p>
-</li>
-<li>
-<p>Reseach Promises in Crystal</p>
-</li>
-<li>
-<p>Finish Callbacks &amp; (Notification)</p>
-</li>
-<li>
-<p>Research/Add Crystal Value Objects</p>
-</li>
-<li>
-<p>Build a Macro to make a simple Actor Class</p>
-</li>
-<li>
-<p>Add Parallelism (Ideally with WebSockets example&#8201;&#8212;&#8201;to extend <code>chat</code>)</p>
-</li>
-<li>
-<p>Add, review, augment and adapt content using: <a href="https://blog.golang.org/pipelines" class="bare">https://blog.golang.org/pipelines</a></p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_resources">8. Resources</h2>
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>Crystal Git Repo - <a href="https://github.com/crystal-lang/crystal/" class="bare">https://github.com/crystal-lang/crystal/</a></p>
-</li>
-<li>
-<p>Crystal Lang GitBook - <a href="https://crystal-lang.org/reference/guides" class="bare">https://crystal-lang.org/reference/guides</a></p>
-</li>
-<li>
-<p>Crystal Lang API Docs - <a href="https://crystal-lang.org/api/0.32.1/index.html" class="bare">https://crystal-lang.org/api/0.32.1/index.html</a></p>
-</li>
-<li>
-<p>Crystal Lang Gitter - <a href="https://gitter.im/crystal-lang/crystal&#8201;&#8212;&#8201;friendly" class="bare">https://gitter.im/crystal-lang/crystal&#8201;&#8212;&#8201;friendly</a> people instrumental in helping me better understand how to implement these ideas in crystal (special mention to: @stnluu_twitter, @watzon, @repomaa, @randiaz95, @straight-shoota &amp; @paulcsmith)</p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_generating_these_docs">9. Generating these Docs</h2>
-<div class="sectionbody">
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">asciidoctor -D docs adoc/*</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/channel_callbacks/main.cr</code></pre>
 </div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_corrections_improvements">10. Corrections &amp; Improvements</h2>
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>please make a <a href="https://github.com/btihen/crystal_explorations/issues">Github issue</a>, a pull request or contact me to improve this document.</p>
-</li>
-</ul>
 </div>
 <div class="paragraph">
-<p>Thanks!</p>
+<p>Now we can wait for all channels to close.</p>
+</div>
+<div class="paragraph">
+<p>Below shows code that allows us to track users 'registered' in the <code>users</code> array (we remove users when they close their channel)</p>
+</div>
+<div class="listingblock">
+<div class="title">src/channel_callbacks/main_stress.cr</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="linenums">require "./user"
+
+module MainStress
+
+  # make callback status channel
+  status = Channel(User).new
+
+  # make a large number of users
+  users  = [] of User
+
+  10000.times do |i|
+    user = User.new(name: "user_#{i}", email: "user_#{i}@example.ch", status: status)
+    users &lt;&lt; user
+  end
+
+  # send lots of messages - async (for some reason async needs to be first)
+  users.each do |receiver|
+    spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
+  end
+
+  # send lots of messages - async (for some reason async needs to be first)
+  users.each do |receiver|
+    spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
+  end
+
+  # close asynchronously to allow messages to be delivered
+  users.each do |receiver|
+    spawn receiver.channel.close
+  end
+
+  # wait for all channels close - which 'unregisters' a user from `users`
+  #######
+  # we can also do this and 'unscribe' users when they close their channels
+  # ideally this would also run within a listener (and not in a loop)
+  while users.size &gt; 0
+    user   = status.receive?
+    break if user.nil?
+
+    users.delete(user)
+    puts "CLOSED: #{user.to_s}"
+  end
+end</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Run with:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/channel_callbacks/main_stress.cr</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>@stnluu_twitter
+Fix for the stress testing is buffering when switching back and forth between sync and async.</p>
+</div>
+<div class="paragraph">
+<p><strong><a href="index.html">Start Page</a></strong></p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-14 20:20:24 +0100
+Last updated 2020-01-14 20:16:40 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">

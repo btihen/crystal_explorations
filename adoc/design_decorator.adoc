@@ -1,0 +1,78 @@
+= Crystal Lang Explorations -- Decorator
+:source-highlighter: prettify
+:source-language: crystal
+Bill Tihen (Crystal 0.32.1)
+Version 0.0.1
+:sectnums:
+:toc:
+:toclevels: 4
+:toc-title: Contents
+
+:description: Exploring Crystal's Features
+:keywords: Crystal Language
+:imagesdir: ./images
+
+*link:index.html[Start Page]*
+
+To demonstrate Structs and Records - lets assume we have a `User` class that can receive messages posted to it.
+
+.src/structs_n_records/user.cr
+[source,linenums]
+----
+require "./message_record"
+
+class User
+  private getter name : String, email : String
+
+  def initialize(@name, @email)
+  end
+
+  def to_s
+    "#{name} <#{email}>"
+  end
+
+  def post_message(message : Message)
+    puts message.to_s
+  end
+end
+----
+
+Below is an example of how the struct is used.
+
+.src/structs_n_records/message_struct_simple.cr
+[source,linenums]
+----
+require "./user"
+
+# UserUnpackPost: A User Decorator responsible to unpack User Messages Posted
+# class UserUnpackPost
+#   def initialize(@user : User)
+#   end
+#
+#   def post_message(message : Message)
+#     text     = message.text
+#     topic    = message.topic
+#     sender   = message.sender
+#     receiver = message.receiver
+#     output = [] of String
+#     output << "-" * 30
+#     output << "From: #{sender.to_s}"
+#     output << "To: #{receiver.to_s}"       unless receiver.nil?
+#     output << "Topic: #{topic.to_s.strip}" unless topic.nil?
+#     output << text.strip
+#     output << "-" * 30
+#     puts output.join("\n")
+#   end
+# end
+#
+# UserUnpackPost.new(user_1).post_message(mesg_1)
+# UserUnpackPost.new(user_2).post_message(mesg_2)
+# UserUnpackPost.new(user_2).post_message(mesg_3)
+----
+
+Run this using:
+```bash
+$ crystal src/design_patterns/decorators.cr
+```
+
+*link:index.html[Start Page]*

@@ -155,16 +155,17 @@ Running this with immediate channel closing creates errors since closing the cha
 
 A simple solution for this is to send the close asynchronously.
 
-=== Stress Testing
+=== Waiting for Channels to close
 
 How well does our code work when messaging lots of objects?
 
 .src/channel_basics/main_stress.cr
 [source,linenums]
 ----
+# src/channel_basics/main_close_wait.cr
 require "./user"
 
-module MainStress
+module MainCloseWait
 
   # make a large number of users
   users  = [] of User
@@ -173,38 +174,23 @@ module MainStress
     users << user
   end
 
-  # both sync and async together doesn't work
-  # users.each do |receiver|
-  #   # async messaging
-  #   spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
-  #
-  #   # synchronous messaging
-  #   receiver.channel.send("SYNC -- From: #{receiver.to_s} - with channel")
-  # end
-
   # send lots of messages - async (for some reason async needs to be first)
   users.each do |receiver|
     spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
   end
 
-  # send lots of messages - sync (for some reason async needs to be first)
-  users.each do |receiver|
-    receiver.channel.send("SYNC -- From: #{receiver.to_s} - with channel")
-  end
-
   # close user channels
   users.each do |receiver|
     # synchronous channel closing
-    # receiver.channel.close
+    receiver.channel.close
 
     # close asynchronously to allow messages to be delivered
-    spawn receiver.channel.close
+    # spawn receiver.channel.close
   end
 
-  # Allow fibers to execute
+  # wait for all channels to close before allowing main to terminate
   Fiber.yield
 
-  # # wait for all channels to close before allowing main to terminate
   # loop do
   #   break if users.all?{ |u| u.channel.closed? } # are all channels are closed?
   #   Fiber.yield
@@ -217,34 +203,22 @@ Run with:
 $ crystal src/channel_basics/main_stress.cr
 ```
 
-With the simple `Fiber.yield` we get a lot of exceptions since the channels then we wait for the async messages to be delivered.
+With the simple `Fiber.yield` and a synchronous close - will won't have a chance to get any messages before we exit.
 
-To solve this simply comment out the synchronous channel closing and use asycn closing, i.e.:
-```crystal
-# close user channels
-users.each do |receiver|
-  # synchronous channel closing
-  # receiver.channel.close
+So obviously, the close being synchronous and the message sending is async means we close our channels and end without sending messages.  To fix this change our close loop to also be async:
+```
+  # close user channels
+  users.each do |receiver|
+    # synchronous channel closing
+    # receiver.channel.close
 
-  # close asynchronously to allow messages to be delivered
-  spawn receiver.channel.close
-end
+    # close asynchronously to allow messages to be delivered
+    spawn receiver.channel.close
+  end
 ```
 
-Unfortunately, if messages are sent asynchronously - then `Fiber.yield` with enough objects - perhaps only 80-90% of the messages have time to get handled before `main` ends. To see this change the sending to asynchronous messaging with:
-```crystal
-# send lots of messages
-users.each do |receiver|
-  # async messaging
-  # spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
-
-  # synchronous messaging
-  receiver.channel.send("SYNC -- From: #{receiver.to_s} - with channel")
-end
+This is a big improvement - now we see messages! BUT if we look closely, we are not getting all our messages - we actually need to wait for all our channels to close before ending.  We can do this by now also changing our wait code to:
 ```
-
-To fix this we need to actually wait and test that all channels are closed.  Change the wait code to:
-```crystal
 # wait for all channels to close before allowing main to terminate
 # Fiber.yield
 
@@ -253,24 +227,7 @@ loop do
   Fiber.yield
 end
 ```
-Now all the messages are delivered again.
 
-Interestingly we get errors if we enable both synchronous and asynchronous message sending, i.e.
-
-```crystal
-# send lots of messages
-users.each do |receiver|
-  # async messaging
-  spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
-
-  # synchronous messaging
-  receiver.channel.send("SYNC -- From: #{receiver.to_s} - with channel")
-end
-```
-
-.TODO:
-****
-Explain and find a solution for using both async and synchronous messaging.
-****
+Now we have time to deliver ALL our messages before exiting!
 
 *link:index.html[Start Page]*

@@ -1,0 +1,128 @@
+= Crystal Lang Explorations -- Records
+:source-highlighter: prettify
+:source-language: crystal
+Bill Tihen (Crystal 0.32.1)
+Version 0.0.1
+:sectnums:
+:toc:
+:toclevels: 4
+:toc-title: Contents
+
+:description: Exploring Crystal's Features
+:keywords: Crystal Language
+:imagesdir: ./images
+
+*link:index.html[Start Page]*
+
+To demonstrate Structs and Records - lets assume we have a `User` class that can receive messages posted to it.
+
+.src/structs_n_records/user.cr
+[source,linenums]
+----
+require "./message_record"
+
+class User
+  private getter name : String, email : String
+
+  def initialize(@name, @email)
+  end
+
+  def to_s
+    "#{name} <#{email}>"
+  end
+
+  def post_message(message : Message)
+    puts message.to_s
+  end
+end
+----
+
+== Records
+
+*Records* are *Structs* with the _initialize_ and _getter_ automatically defined.
+
+Records are actually Structs with Macros used to automatically generate the _initialize_ and _getter_ definitions - see: https://github.com/crystal-lang/crystal/blob/master/src/macros.cr
+
+=== Records (no methods)
+
+Thus the simplest Record definition for a Message would be:
+
+```
+record(Message, sender : User, text : String, receiver : User? = nil, topic : String? = nil)
+
+# or without the parens
+
+record Message, sender : User, text : String, receiver : User? = nil, topic : String? = nil
+```
+
+The following code demostrates how to use records.
+
+.src/structs_n_records/simple_record.cr
+[source,linenums]
+----
+require "./user"
+
+record(Message, sender : User, text : String, receiver : User? = nil, topic : String? = nil)
+
+user_1 = User.new(name: "user_1", email: "user_1@example.com")
+user_2 = User.new(name: "user_2", email: "user_2@example.com")
+
+mesg_1 = Message.new(sender: user_2, text: "Hi")
+mesg_2 = Message.new(sender: user_1, text: "Hoi", topic: "Greet")
+mesg_3 = Message.new(sender: user_1, text: "Hoi", topic: "Greet", receiver: user_2)
+
+user_1.post_message(mesg_1)
+user_2.post_message(mesg_2)
+user_2.post_message(mesg_3)
+----
+
+Run this using:
+
+```bash
+$ crystal src/structs_n_records/simple_record.cr
+```
+
+This of course has the same limitation as a Struct without a `to_s` methods.
+
+=== Records (with methods)
+
+Assuming you want a custom method then the record looks like:
+
+.src/structs_n_records/message_record.cr
+[source,linenums]
+----
+require "./user"
+
+record(Message, sender : User,          text : String,
+                receiver : User? = nil, topic : String = "") do
+  def to_s
+    output = [] of String
+    output << "-" * 30
+    output << "From: #{sender.to_s}"
+    output << "To: #{receiver.to_s}"  unless receiver.nil?
+    output << "Topic: #{topic.to_s.strip}"
+    output << text.strip
+    output << "-" * 30
+    output.join("\n")
+  end
+end
+
+user_1 = User.new(name: "user_1", email: "user_1@example.com")
+user_2 = User.new(name: "user_2", email: "user_2@example.com")
+
+mesg_1 = Message.new(sender: user_2, text: "Hi")
+mesg_2 = Message.new(sender: user_1, text: "Hoi", topic: "Greet")
+mesg_3 = Message.new(sender: user_1, text: "Hoi", topic: "Greet", receiver: user_2)
+
+user_1.post_message(mesg_1)
+user_2.post_message(mesg_2)
+user_2.post_message(mesg_3)
+----
+
+Run this using:
+
+```bash
+$ crystal src/structs_n_records/message_record.cr
+```
+
+*link:index.html[Start Page]*

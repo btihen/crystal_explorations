@@ -37,71 +37,66 @@ For all other systems see: https://crystal-lang.org/install/
 crystal run src/file_name.cr
 ```
 
-== link:structs_n_records.html[Structs & Records]
+== Structs & Records
+
+=== link:structs.html[Structs]
 
 * Structs _(& Records)_ are immutable data structures - these are `safe` when used in a concurrent/parallel context.
 
-== Value Objects (pass values with a context)
+=== link:records.html[Records]
 
-.TODO
-****
-Check if Crystal structs have built in value comparisons or if those need to be added to build a proper *Value Object*
-****
-
-== link:concurrency_basics.html[Concurrency]
-
-* Basics on starting processes concurrently
-
-== link:concurrent_objects.html[Concurrent Objects]
-
-* Examples of using concurrency with objects
-
-== link:channel_basics.html[Channel Basics]
-
-* Channels allow us to safely communicate between concurrent processes.
-* To safely share data/state send immutable data only **(Structs are a good option)**.
-
-== Buffered Channels
-
-* What to do when messages come faster than collected
-
-NOTE: Share the smallest possible data structure - large data structures will be slow to copy.
-
-== link:channel_callbacks.html[Concurrent State Sharing]
-
-* Safely share state information when its available
-
-== link:channel_buffers.html[Channel Buffers]
-
-* Handling async message queues
-
-== Parallelism (with WebSockets)
-
-* Compiling to use multiple CPUs
+* Structs _(& Records)_ are immutable data structures - these are `safe` when used in a concurrent/parallel context.
 
 == Macros
 
 * Crystal's answer to Meta-programming
 * Using macros to reduce boiler-plate and build a simple **Actor Model**
 
-== Concurrency using the **Actor Model**
+== Design Patterns
+
+=== Decorator
+
+=== Value Objects (pass values with a context)
+
+.TODO
+****
+Check if Crystal structs have built in value comparisons or if those need to be added to build a proper *Value Object*
+****
+
+== Concurrency & Parallelism
+
+=== link:concurrency_basics.html[Concurrency Basics]
+
+* Basics on starting processes concurrently
+
+=== link:concurrent_objects.html[Concurrent Objects]
+
+* Examples of using concurrency with objects
+
+=== link:channels_async_messaging.html[Channels _(Async Messaging)_]
+
+* Channels allow us to safely communicate between concurrent processes.
+* To safely share data/state send immutable data only **(Structs are a good option)**.
+
+=== link:channel_buffers.html[Channel Buffers]
+
+* What to do when messages come faster than collected
+
+NOTE: Share the smallest possible data structure - large data structures will be slow to copy.
+
+=== link:async_state_sharing.html[Async State Sharing]
+
+* Safely share state information when its available
+
+=== Parallelism
+
+* Compiling to use multiple CPUs
+
+=== Actor Model
 
 * Using macros to build async message sending, callbacks and state sharing.
 
-== Resources
-
-* Crystal Git Repo - https://github.com/crystal-lang/crystal/
-* Crystal Lang GitBook - https://crystal-lang.org/reference/guides
-* Crystal Lang API Docs - https://crystal-lang.org/api/0.32.1/index.html
-* Crystal Lang Gitter - https://gitter.im/crystal-lang/crystal -- friendly people instrumental in helping me better understand how to implement these ideas in crystal (special mention to: @stnluu_twitter, @watzon, @repomaa, @randiaz95, @straight-shoota & @paulcsmith)
-
-== Generating the Docs
-
-```bash
-asciidoctor -D docs adoc/*
-```
-
-== TODO:
+== TO-DOs
 
 * Add Macros
 * Write Channel Buffering
@@ -111,6 +106,19 @@ asciidoctor -D docs adoc/*
 * Build a Macro to make a simple Actor Class
 * Add Parallelism (Ideally with WebSockets example -- to extend `chat`)
 * Add, review, augment and adapt content using: https://blog.golang.org/pipelines
+
+== Resources
+
+* Crystal Git Repo - https://github.com/crystal-lang/crystal/
+* Crystal Lang GitBook - https://crystal-lang.org/reference/guides
+* Crystal Lang API Docs - https://crystal-lang.org/api/0.32.1/index.html
+* Crystal Lang Gitter - https://gitter.im/crystal-lang/crystal -- friendly people instrumental in helping me better understand how to implement these ideas in crystal (special mention to: @stnluu_twitter, @watzon, @repomaa, @randiaz95, @straight-shoota & @paulcsmith)
+
+== Generating these Docs
+
+```bash
+asciidoctor -D docs adoc/*
+```
 
 == Corrections & Improvements
 

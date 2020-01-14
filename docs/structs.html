@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
 <meta name="author" content="Bill Tihen (Crystal 0.32.1)">
-<title>Crystal Lang Explorations&#8201;&#8212;&#8201;Start Page</title>
+<title>Crystal Lang Explorations&#8201;&#8212;&#8201;Structs</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -439,7 +439,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
-<h1>Crystal Lang Explorations&#8201;&#8212;&#8201;Start Page</h1>
+<h1>Crystal Lang Explorations&#8201;&#8212;&#8201;Structs</h1>
 <div class="details">
 <span id="author" class="author">Bill Tihen (Crystal 0.32.1)</span><br>
 <span id="revdate">Version 0.0.1</span>
@@ -447,36 +447,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toc" class="toc">
 <div id="toctitle">Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_installation">1. Installation</a></li>
-<li><a href="#_crystal_cli">2. Crystal CLI</a></li>
-<li><a href="#_structs_records">3. Structs &amp; Records</a>
+<li><a href="#_structs_introduction">1. Structs - Introduction</a></li>
+<li><a href="#_structs">2. Structs</a>
 <ul class="sectlevel2">
-<li><a href="#_structs">3.1. Structs</a></li>
-<li><a href="#_records">3.2. Records</a></li>
+<li><a href="#_data_structs_no_methods">2.1. Data Structs (no methods)</a></li>
+<li><a href="#_struct_with_methods_responsible_for_its_own_internal_structure">2.2. Struct with Methods - (responsible for its own internal structure)</a></li>
 </ul>
 </li>
-<li><a href="#_macros">4. Macros</a></li>
-<li><a href="#_design_patterns">5. Design Patterns</a>
-<ul class="sectlevel2">
-<li><a href="#_decorator">5.1. Decorator</a></li>
-<li><a href="#_value_objects_pass_values_with_a_context">5.2. Value Objects (pass values with a context)</a></li>
-</ul>
-</li>
-<li><a href="#_concurrency_parallelism">6. Concurrency &amp; Parallelism</a>
-<ul class="sectlevel2">
-<li><a href="#_concurrency_basics">6.1. Concurrency Basics</a></li>
-<li><a href="#_concurrent_objects">6.2. Concurrent Objects</a></li>
-<li><a href="#_channels_async_messaging">6.3. Channels <em>(Async Messaging)</em></a></li>
-<li><a href="#_channel_buffers">6.4. Channel Buffers</a></li>
-<li><a href="#_async_state_sharing">6.5. Async State Sharing</a></li>
-<li><a href="#_parallelism">6.6. Parallelism</a></li>
-<li><a href="#_actor_model">6.7. Actor Model</a></li>
-</ul>
-</li>
-<li><a href="#_to_dos">7. TO-DOs</a></li>
-<li><a href="#_resources">8. Resources</a></li>
-<li><a href="#_generating_these_docs">9. Generating these Docs</a></li>
-<li><a href="#_corrections_improvements">10. Corrections &amp; Improvements</a></li>
 </ul>
 </div>
 </div>
@@ -484,7 +461,49 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Exploring &amp; Learning Crystal Language with code examples and augment the documentation.</p>
+<p><strong><a href="index.html">Start Page</a></strong></p>
+</div>
+<div class="paragraph">
+<p>To demonstrate Structs and Records - lets assume we have a <code>User</code> class that can receive messages posted to it.</p>
+</div>
+<div class="listingblock">
+<div class="title">src/structs_n_records/user.cr</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="linenums">require "./message_record"
+
+class User
+  private getter name : String, email : String
+
+  def initialize(@name, @email)
+  end
+
+  def to_s
+    "#{name} &lt;#{email}&gt;"
+  end
+
+  def post_message(message : Message)
+    puts message.to_s
+  end
+end</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_structs_introduction">1. Structs - Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I like to think of these as flexible immutable data types - with very few if any methods.</p>
+</div>
+<div class="paragraph">
+<p>Structs (&amp; Records) are basically classes, but:
+* they are immutable <em>(once created the values don&#8217;t change)</em>
+* they are passed by <strong>value</strong> NOT by REFERENCE (this means the data is COPIED)</p>
+</div>
+<div class="paragraph">
+<p>Good uses include:
+* pass immutable data between Fibers
+* build <strong>Value Objects</strong> (like representing money which has a value and a currency).</p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -492,10 +511,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="ulist">
 <ul>
 <li>
-<p>The code is just good enough to demonstrate an idea.</p>
+<p>Immutability makes Structs (&amp; Records) safe to pass between Fibers via Channels.</p>
 </li>
 <li>
-<p>This code does not focus on best practices, security nor being production ready.</p>
+<p>Given structs are COPIED - very large structures may slow-down your code and use a lot of memory.</p>
 </li>
 </ul>
 </div>
@@ -504,274 +523,159 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect1">
-<h2 id="_installation">1. Installation</h2>
+<h2 id="_structs">2. Structs</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>On MacOS - use:</p>
+<p>Structs are immutable classes focused on presenting / passing data.</p>
+</div>
+<div class="sect2">
+<h3 id="_data_structs_no_methods">2.1. Data Structs (no methods)</h3>
+<div class="paragraph">
+<p>The simplest Data Struct contains a <code>getter</code> and an <code>initialize</code> method - as seen below:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">$ brew install crystal</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>For all other systems see: <a href="https://crystal-lang.org/install/" class="bare">https://crystal-lang.org/install/</a></p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_crystal_cli">2. <a href="crystal_cli.html">Crystal CLI</a></h2>
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>Useful commands when using crystal</p>
-</li>
-<li>
-<p>My most useful command while developing is:</p>
-</li>
-</ul>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="crystal">crystal run src/file_name.cr</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_structs_records">3. Structs &amp; Records</h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_structs">3.1. <a href="structs.html">Structs</a></h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Structs <em>(&amp; Records)</em> are immutable data structures - these are <code>safe</code> when used in a concurrent/parallel context.</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_records">3.2. <a href="records.html">Records</a></h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Structs <em>(&amp; Records)</em> are immutable data structures - these are <code>safe</code> when used in a concurrent/parallel context.</p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_macros">4. Macros</h2>
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>Crystal&#8217;s answer to Meta-programming</p>
-</li>
-<li>
-<p>Using macros to reduce boiler-plate and build a simple <strong>Actor Model</strong></p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_design_patterns">5. Design Patterns</h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_decorator">5.1. Decorator</h3>
+<pre class="prettyprint highlight"><code data-lang="crystal">struct Message
+  getter sender, receiver, topic, text
 
+  def initialize(@sender  : User, @text : String, @receiver : User? = nil, @topic : String? = nil)
+    @text = text.strip
+  end
+end</code></pre>
 </div>
-<div class="sect2">
-<h3 id="_value_objects_pass_values_with_a_context">5.2. Value Objects (pass values with a context)</h3>
-<div class="sidebarblock">
-<div class="content">
-<div class="title">TODO</div>
+</div>
 <div class="paragraph">
-<p>Check if Crystal structs have built in value comparisons or if those need to be added to build a proper <strong>Value Object</strong></p>
+<p>Below is an example of how the struct is used.</p>
+</div>
+<div class="listingblock">
+<div class="title">src/structs_n_records/message_struct_simple.cr</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="linenums">require "./user"
+
+struct Message
+  getter sender, receiver, topic, text
+
+  def initialize(@sender  : User, @text : String, @receiver : User? = nil, @topic : String? = nil)
+    @text = text.strip
+  end
+end
+
+user_1 = User.new(name: "user_1", email: "user_1@example.com")
+user_2 = User.new(name: "user_2", email: "user_2@example.com")
+
+mesg_1 = Message.new(sender: user_2, text: "Hi")
+mesg_2 = Message.new(sender: user_1, text: "Hoi", topic: "Greet")
+mesg_3 = Message.new(sender: user_1, text: "Hoi", topic: "Greet", receiver: user_2)
+
+user_1.post_message(mesg_1)
+user_2.post_message(mesg_2)
+user_2.post_message(mesg_3)
+
+# # UserUnpackPost: A User Decorator responsible to unpack User Messages Posted
+# class UserUnpackPost
+#   def initialize(@user : User)
+#   end
+#
+#   def post_message(message : Message)
+#     text     = message.text
+#     topic    = message.topic
+#     sender   = message.sender
+#     receiver = message.receiver
+#     output = [] of String
+#     output &lt;&lt; "-" * 30
+#     output &lt;&lt; "From: #{sender.to_s}"
+#     output &lt;&lt; "To: #{receiver.to_s}"       unless receiver.nil?
+#     output &lt;&lt; "Topic: #{topic.to_s.strip}" unless topic.nil?
+#     output &lt;&lt; text.strip
+#     output &lt;&lt; "-" * 30
+#     puts output.join("\n")
+#   end
+# end
+#
+# UserUnpackPost.new(user_1).post_message(mesg_1)
+# UserUnpackPost.new(user_2).post_message(mesg_2)
+# UserUnpackPost.new(user_2).post_message(mesg_3)</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>Run this using:</p>
 </div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_concurrency_parallelism">6. Concurrency &amp; Parallelism</h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_concurrency_basics">6.1. <a href="concurrency_basics.html">Concurrency Basics</a></h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Basics on starting processes concurrently</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_concurrent_objects">6.2. <a href="concurrent_objects.html">Concurrent Objects</a></h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Examples of using concurrency with objects</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_channels_async_messaging">6.3. <a href="channels_async_messaging.html">Channels <em>(Async Messaging)</em></a></h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Channels allow us to safely communicate between concurrent processes.</p>
-</li>
-<li>
-<p>To safely share data/state send immutable data only <strong>(Structs are a good option)</strong>.</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_channel_buffers">6.4. <a href="channel_buffers.html">Channel Buffers</a></h3>
-<div class="ulist">
-<ul>
-<li>
-<p>What to do when messages come faster than collected</p>
-</li>
-</ul>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">
-Share the smallest possible data structure - large data structures will be slow to copy.
-</td>
-</tr>
-</table>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_async_state_sharing">6.5. <a href="async_state_sharing.html">Async State Sharing</a></h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Safely share state information when its available</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_parallelism">6.6. Parallelism</h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Compiling to use multiple CPUs</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_actor_model">6.7. Actor Model</h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Using macros to build async message sending, callbacks and state sharing.</p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_to_dos">7. TO-DOs</h2>
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>Add Macros</p>
-</li>
-<li>
-<p>Write Channel Buffering</p>
-</li>
-<li>
-<p>Reseach Promises in Crystal</p>
-</li>
-<li>
-<p>Finish Callbacks &amp; (Notification)</p>
-</li>
-<li>
-<p>Research/Add Crystal Value Objects</p>
-</li>
-<li>
-<p>Build a Macro to make a simple Actor Class</p>
-</li>
-<li>
-<p>Add Parallelism (Ideally with WebSockets example&#8201;&#8212;&#8201;to extend <code>chat</code>)</p>
-</li>
-<li>
-<p>Add, review, augment and adapt content using: <a href="https://blog.golang.org/pipelines" class="bare">https://blog.golang.org/pipelines</a></p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_resources">8. Resources</h2>
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>Crystal Git Repo - <a href="https://github.com/crystal-lang/crystal/" class="bare">https://github.com/crystal-lang/crystal/</a></p>
-</li>
-<li>
-<p>Crystal Lang GitBook - <a href="https://crystal-lang.org/reference/guides" class="bare">https://crystal-lang.org/reference/guides</a></p>
-</li>
-<li>
-<p>Crystal Lang API Docs - <a href="https://crystal-lang.org/api/0.32.1/index.html" class="bare">https://crystal-lang.org/api/0.32.1/index.html</a></p>
-</li>
-<li>
-<p>Crystal Lang Gitter - <a href="https://gitter.im/crystal-lang/crystal&#8201;&#8212;&#8201;friendly" class="bare">https://gitter.im/crystal-lang/crystal&#8201;&#8212;&#8201;friendly</a> people instrumental in helping me better understand how to implement these ideas in crystal (special mention to: @stnluu_twitter, @watzon, @repomaa, @randiaz95, @straight-shoota &amp; @paulcsmith)</p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_generating_these_docs">9. Generating these Docs</h2>
-<div class="sectionbody">
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">asciidoctor -D docs adoc/*</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/structs_n_records/message_struct_simple.cr</code></pre>
 </div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_corrections_improvements">10. Corrections &amp; Improvements</h2>
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>please make a <a href="https://github.com/btihen/crystal_explorations/issues">Github issue</a>, a pull request or contact me to improve this document.</p>
-</li>
-</ul>
 </div>
 <div class="paragraph">
-<p>Thanks!</p>
+<p>This works - but the messages print in a pretty unsatisfactory manner.  It&#8217;s not great design if <strong>User</strong> class needs to know the internal structure of <strong>Message</strong> to print.</p>
+</div>
+<div class="paragraph">
+<p>One solution would be use a <strong>Decorator/Wrapper</strong> class which knows the details of the <strong>Message</strong> internals.  Uncomment the decorator code to see the effect (but ideally <strong>Message</strong> should not many ANY other part of code know its implementation details).  The next section shows a much better approach.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_struct_with_methods_responsible_for_its_own_internal_structure">2.2. Struct with Methods - (responsible for its own internal structure)</h3>
+<div class="paragraph">
+<p>Data Structs work well for the purpose of passing immutable data as seen above, but it is also convenient if other consuming classes don&#8217;t need to know the internals of the struct.</p>
+</div>
+<div class="paragraph">
+<p>To fix this <code>structs</code> can also define <strong>methods</strong>&#8201;&#8212;&#8201;they should be at a minimum and should not attempt to mutate the state.  Below is an example that adds the <code>to_s</code> to allow the <code>User</code> class to easily consume / print the Message (in a much cleaner way where <strong>Message</strong> class knows how to present its data).</p>
+</div>
+<div class="listingblock">
+<div class="title">src/structs_n_records/message_struct.cr</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="linenums">require "./user"
+
+struct Message
+  getter sender, receiver, topic, text
+
+  def initialize(@sender  : User, @text : String, @receiver : User? = nil, @topic : String? = nil)
+  end
+
+  def to_s
+    output = [] of String
+    output &lt;&lt; "-" * 30
+    output &lt;&lt; "From: #{sender.to_s}"
+    output &lt;&lt; "To: #{receiver.to_s}"       unless receiver.nil?
+    output &lt;&lt; "Topic: #{topic.to_s.strip}" unless topic.nil?
+    output &lt;&lt; text.strip
+    output &lt;&lt; "-" * 30
+    output.join("\n")
+  end
+end
+
+user_1 = User.new(name: "user_1", email: "user_1@example.com")
+user_2 = User.new(name: "user_2", email: "user_2@example.com")
+
+mesg_1 = Message.new(sender: user_2, text: "Hi")
+mesg_2 = Message.new(sender: user_1, text: "Hoi", topic: "Greet")
+mesg_3 = Message.new(sender: user_1, text: "Hoi", topic: "Greet", receiver: user_2)
+
+user_1.post_message(mesg_1)
+user_2.post_message(mesg_2)
+user_2.post_message(mesg_3)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Run this using:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/structs_n_records/message_struct.cr</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In this way we can add (possibly remove) data and features from the <strong>Message</strong> all transparently to the <strong>User</strong></p>
+</div>
+<div class="paragraph">
+<p><strong><a href="index.html">Start Page</a></strong></p>
+</div>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-14 20:20:24 +0100
+Last updated 2020-01-14 17:00:46 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">

@@ -515,36 +515,6 @@ end</code></pre>
 </ol>
 </div>
 <div class="paragraph">
-<p>NOTE:</p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph">
-<p>we have now added to the initializer &amp; private getter our new <code>departure_channel</code></p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="crystal">private getter name, email, departure_channel
-#                           ^^^^^^^^^^^^^^^^^
-
-def initialize(@name : String, @email : String, @departure_channel : Channel(User))
-#                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This take injects the external channel into our class and makes it available to the User.</p>
-</div>
-<div class="paragraph">
-<p>Also note that <strong>AFTER</strong> the loop (closing the channel ends the loop) - and the code moves on the callback over the <code>departure_channel</code></p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="crystal">departure_channel.send(self)</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="paragraph">
 <p>We can use our new channel callback in the following way:</p>
 </div>
 <div class="listingblock">
@@ -572,7 +542,7 @@ module Main
     spawn receiver.message_channel.send("ASYNC 1 -- From: #{receiver.to_s} - with channel")
   end
 
-  # channels are designed to allow chaining too!
+  # channels allow chaining too!
   # users.each do |receiver|
   #   receiver.message_channel.send("SYNC 2 -- From: #{receiver.to_s} - with channel").send("SYNC 3 -- From: #{receiver.to_s} - with channel")
   #   spawn receiver.message_channel.send("ASYNC 4 -- From: #{receiver.to_s} - with channel").send("ASYNC 5 -- From: #{receiver.to_s} - with channel").close
@@ -616,7 +586,7 @@ end</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="crystal"># channels are designed to allow chaining too!
+<pre class="prettyprint highlight"><code data-lang="crystal"># channels allow chaining too!
 users.each do |receiver|
   receiver.message_channel.send("SYNC 2 -- From: #{receiver.to_s} - with channel").send("SYNC 3 -- From: #{receiver.to_s} - with channel")
   spawn receiver.message_channel.send("ASYNC 4 -- From: #{receiver.to_s} - with channel").send("ASYNC 5 -- From: #{receiver.to_s} - with channel").close
@@ -636,7 +606,7 @@ end
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-15 22:14:58 +0100
+Last updated 2020-01-15 22:15:56 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">

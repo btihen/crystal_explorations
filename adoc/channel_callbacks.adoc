@@ -1,0 +1,131 @@
+= Crystal Lang Explorations -- Channel Callbacks
+:source-highlighter: prettify
+:source-language: crystal
+Bill Tihen (Crystal 0.32.1)
+Version 0.0.1
+:sectnums:
+:toc:
+:toclevels: 4
+:toc-title: Contents
+
+:description: Exploring Crystal's Features
+:keywords: Crystal Language
+:imagesdir: ./images
+
+
+*link:index.html[Start Page]*
+
+== Callbacks (Async Responses)
+
+So far we have focused on "Tell" don't "Ask" messaging (East-Oriented).  This is a good focus, but sometimes its helpful to know the state of other objects (Sharing is Caring ;).
+
+For example in our User messaging examples - what if we were connected to a chat-room and not messaging other users directly.  To avoid lots of complicated logic to avoid runtime errors if channels are closed (like we saw before in the Channel Buffering), we as a chat room need to know if users are in the chatroom or not.
+
+We can do this with a notification channel (a sort-of callback) to the chatroom when we leave - and we can keep the code focused on *Tell* don't *Ask* using channels with our callback.
+
+.src/channel_callbacks/user.cr
+[source,linenums]
+----
+class User
+  getter         message_channel : Channel(String)
+
+  private getter name, email, departure_channel
+
+  def initialize(@name : String, @email : String, @departure_channel : Channel(User)) # <1>
+    @message_channel = Channel(String).new(3)
+    listen_for_messages
+  end
+
+  def to_s
+    "#{name} <#{email}>"
+  end
+
+  private def listen_for_messages
+    spawn do
+      loop do
+        message = message_channel.receive?
+        break     if message.nil?
+
+        puts "To: #{to_s} -- #{message}"
+      end
+      puts "#{to_s} -- CLOSING"
+      # notify main when done
+      departure_channel.send(self)  # <2>
+    end
+  end
+end
+----
+<1> Inject the external channel into our class and makes it available to the User.
+<2> *AFTER* the loop (closing the channel ends the loop) - and the code moves on the callback over the `departure_channel`
+
+We can use our new channel callback in the following way:
+
+.src/channel_callbacks/main.cr
+[source,linenums]
+----
+# src/channel_callbacks/main.cr
+require "./user"
+
+module Main
+
+  # make callback status channel
+  user_closed = Channel(User).new
+
+  # make a large number of users
+  users  = [] of User
+
+  100.times do |i|
+    user = User.new(name: "user_#{i}", email: "user_#{i}@example.ch", departure_channel: user_closed)
+    users << user
+  end
+
+  # send lots of messages - async (for some reason async needs to be first)
+  users.each do |receiver|
+    receiver.message_channel.send("SYNC 0 -- From: #{receiver.to_s} - with channel")
+    spawn receiver.message_channel.send("ASYNC 1 -- From: #{receiver.to_s} - with channel")
+  end
+
+  # channels allow chaining too!
+  # users.each do |receiver|
+  #   receiver.message_channel.send("SYNC 2 -- From: #{receiver.to_s} - with channel").send("SYNC 3 -- From: #{receiver.to_s} - with channel")
+  #   spawn receiver.message_channel.send("ASYNC 4 -- From: #{receiver.to_s} - with channel").send("ASYNC 5 -- From: #{receiver.to_s} - with channel").close
+  # end
+
+  # close asynchronously to allow all messages to be delivered and put close at the end of the queue
+  users.each do |receiver|
+    spawn receiver.message_channel.close
+  end
+
+  # wait for all users to close
+  (users.size).times { user_closed.receive }
+end
+
+----
+
+Run with:
+```bash
+$ crystal src/channel_callbacks/main.cr
+```
+
+Now we can wait for all channels to close using our callback.
+
+.NOTE
+****
+* all async message arrive in the order they are send
+****
+
+We can also chain messages to channels change the code to the following and run again.
+```
+# channels allow chaining too!
+users.each do |receiver|
+  receiver.message_channel.send("SYNC 2 -- From: #{receiver.to_s} - with channel").send("SYNC 3 -- From: #{receiver.to_s} - with channel")
+  spawn receiver.message_channel.send("ASYNC 4 -- From: #{receiver.to_s} - with channel").send("ASYNC 5 -- From: #{receiver.to_s} - with channel").close
+end
+
+# close asynchronously to allow all messages to be delivered and put close at the end of the queue
+# users.each do |receiver|
+#   spawn receiver.message_channel.close
+# end
+```
+
+*link:index.html[Start Page]*

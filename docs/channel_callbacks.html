@@ -447,7 +447,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toc" class="toc">
 <div id="toctitle">Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_channel_callbacks">1. Channel Callbacks</a></li>
+<li><a href="#_callbacks_async_responses">1. Callbacks (Async Responses)</a></li>
 </ul>
 </div>
 </div>
@@ -460,23 +460,27 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect1">
-<h2 id="_channel_callbacks">1. Channel Callbacks</h2>
+<h2 id="_callbacks_async_responses">1. Callbacks (Async Responses)</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>When we no longer need to communicate with a <code>User</code> we are keeping the channel open - which won&#8217;t allow the garbage collector to remove unused instances.</p>
+<p>So far we have focused on "Tell" don&#8217;t "Ask" messaging (East-Oriented).  This is a good focus, but sometimes its helpful to know the state of other objects (Sharing is Caring ;).</p>
 </div>
 <div class="paragraph">
-<p>Ideally, we will close the channel, remove the user from the chat registry and only close the chat after all messages are delivered.</p>
+<p>For example in our User messaging examples - what if we were connected to a chat-room and not messaging other users directly.  To avoid lots of complicated logic to avoid runtime errors if channels are closed (like we saw before in the Channel Buffering), we as a chat room need to know if users are in the chatroom or not.</p>
+</div>
+<div class="paragraph">
+<p>We can do this with a notification channel (a sort-of callback) to the chatroom when we leave - and we can keep the code focused on <strong>Tell</strong> don&#8217;t <strong>Ask</strong> using channels with our callback.</p>
 </div>
 <div class="listingblock">
 <div class="title">src/channel_callbacks/user.cr</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="linenums">class User
-  getter channel : Channel(String)
-  private getter name : String, email : String, sign_out : Channel(User)
+  getter         message_channel : Channel(String)
 
-  def initialize(@name, @email, @status)
-    @channel = Channel(String).new(2)
+  private getter name, email, departure_channel
+
+  def initialize(@name : String, @email : String, @departure_channel : Channel(User)) # <b class="conum">(1)</b>
+    @message_channel = Channel(String).new(3)
     listen_for_messages
   end
 
@@ -487,41 +491,101 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
   private def listen_for_messages
     spawn do
       loop do
-        message = channel.receive?
+        message = message_channel.receive?
         break     if message.nil?
 
         puts "To: #{to_s} -- #{message}"
       end
       puts "#{to_s} -- CLOSING"
-      sign_out.send(self)   # loop ends when channels closes - send close status
+      # notify main when done
+      departure_channel.send(self)  # <b class="conum">(2)</b>
     end
   end
 end</code></pre>
 </div>
 </div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Inject the external channel into our class and makes it available to the User.</p>
+</li>
+<li>
+<p><strong>AFTER</strong> the loop (closing the channel ends the loop) - and the code moves on the callback over the <code>departure_channel</code></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>NOTE:</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph">
+<p>we have now added to the initializer &amp; private getter our new <code>departure_channel</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="crystal">private getter name, email, departure_channel
+#                           ^^^^^^^^^^^^^^^^^
+
+def initialize(@name : String, @email : String, @departure_channel : Channel(User))
+#                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This take injects the external channel into our class and makes it available to the User.</p>
+</div>
+<div class="paragraph">
+<p>Also note that <strong>AFTER</strong> the loop (closing the channel ends the loop) - and the code moves on the callback over the <code>departure_channel</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="crystal">departure_channel.send(self)</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>We can use our new channel callback in the following way:</p>
+</div>
 <div class="listingblock">
 <div class="title">src/channel_callbacks/main.cr</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="linenums">require "./user"
+<pre class="prettyprint highlight"><code data-lang="linenums"># src/channel_callbacks/main.cr
+require "./user"
 
-# create users
-status = Channel(User).new
+module Main
 
-user_1 = User.new(name: "first",  email: "first@example.ch", status: status)
-user_2 = User.new(name: "second", email: "second@example.ch", status: status)
+  # make callback status channel
+  user_closed = Channel(User).new
 
-puts "REAL-TIME - START"
-spawn user_1.channel.send("ASYNC sent 1st!")
-user_1.channel.send("REAL-TIME sent 2nd!")
-spawn user_1.channel.send("ASYNC sent 3th!")
-user_2.channel.send("REAL-TIME sent 4th!")
-spawn user_2.channel.send("ASYNC sent 5th!")
-user_1.channel.send("REAL-TIME sent 6th!")
-puts "REAL-TIME - DONE"
-user_1.channel.close
-user_2.channel.close
+  # make a large number of users
+  users  = [] of User
 
-2.times { status.receive }</code></pre>
+  100.times do |i|
+    user = User.new(name: "user_#{i}", email: "user_#{i}@example.ch", departure_channel: user_closed)
+    users &lt;&lt; user
+  end
+
+  # send lots of messages - async (for some reason async needs to be first)
+  users.each do |receiver|
+    receiver.message_channel.send("SYNC 0 -- From: #{receiver.to_s} - with channel")
+    spawn receiver.message_channel.send("ASYNC 1 -- From: #{receiver.to_s} - with channel")
+  end
+
+  # channels are designed to allow chaining too!
+  # users.each do |receiver|
+  #   receiver.message_channel.send("SYNC 2 -- From: #{receiver.to_s} - with channel").send("SYNC 3 -- From: #{receiver.to_s} - with channel")
+  #   spawn receiver.message_channel.send("ASYNC 4 -- From: #{receiver.to_s} - with channel").send("ASYNC 5 -- From: #{receiver.to_s} - with channel").close
+  # end
+
+  # close asynchronously to allow all messages to be delivered and put close at the end of the queue
+  users.each do |receiver|
+    spawn receiver.message_channel.close
+  end
+
+  # wait for all users to close
+  (users.size).times { user_closed.receive }
+end</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -533,69 +597,36 @@ user_2.channel.close
 </div>
 </div>
 <div class="paragraph">
-<p>Now we can wait for all channels to close.</p>
+<p>Now we can wait for all channels to close using our callback.</p>
 </div>
-<div class="paragraph">
-<p>Below shows code that allows us to track users 'registered' in the <code>users</code> array (we remove users when they close their channel)</p>
-</div>
-<div class="listingblock">
-<div class="title">src/channel_callbacks/main_stress.cr</div>
+<div class="sidebarblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="linenums">require "./user"
-
-module MainStress
-
-  # make callback status channel
-  status = Channel(User).new
-
-  # make a large number of users
-  users  = [] of User
-
-  10000.times do |i|
-    user = User.new(name: "user_#{i}", email: "user_#{i}@example.ch", status: status)
-    users &lt;&lt; user
-  end
-
-  # send lots of messages - async (for some reason async needs to be first)
-  users.each do |receiver|
-    spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
-  end
-
-  # send lots of messages - async (for some reason async needs to be first)
-  users.each do |receiver|
-    spawn receiver.channel.send("ASYNC -- From: #{receiver.to_s} - with channel")
-  end
-
-  # close asynchronously to allow messages to be delivered
-  users.each do |receiver|
-    spawn receiver.channel.close
-  end
-
-  # wait for all channels close - which 'unregisters' a user from `users`
-  #######
-  # we can also do this and 'unscribe' users when they close their channels
-  # ideally this would also run within a listener (and not in a loop)
-  while users.size &gt; 0
-    user   = status.receive?
-    break if user.nil?
-
-    users.delete(user)
-    puts "CLOSED: #{user.to_s}"
-  end
-end</code></pre>
+<div class="title">NOTE</div>
+<div class="ulist">
+<ul>
+<li>
+<p>all async message arrive in the order they are send</p>
+</li>
+</ul>
+</div>
 </div>
 </div>
 <div class="paragraph">
-<p>Run with:</p>
+<p>We can also chain messages to channels change the code to the following and run again.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">$ crystal src/channel_callbacks/main_stress.cr</code></pre>
+<pre class="prettyprint highlight"><code data-lang="crystal"># channels are designed to allow chaining too!
+users.each do |receiver|
+  receiver.message_channel.send("SYNC 2 -- From: #{receiver.to_s} - with channel").send("SYNC 3 -- From: #{receiver.to_s} - with channel")
+  spawn receiver.message_channel.send("ASYNC 4 -- From: #{receiver.to_s} - with channel").send("ASYNC 5 -- From: #{receiver.to_s} - with channel").close
+end
+
+# close asynchronously to allow all messages to be delivered and put close at the end of the queue
+# users.each do |receiver|
+#   spawn receiver.message_channel.close
+# end</code></pre>
 </div>
-</div>
-<div class="paragraph">
-<p>@stnluu_twitter
-Fix for the stress testing is buffering when switching back and forth between sync and async.</p>
 </div>
 <div class="paragraph">
 <p><strong><a href="index.html">Start Page</a></strong></p>
@@ -605,7 +636,7 @@ Fix for the stress testing is buffering when switching back and forth between sy
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-12 21:13:59 +0100
+Last updated 2020-01-15 22:14:58 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">

@@ -56,6 +56,8 @@ crystal run src/file_name.cr
 
 === Decorator
 
+=== Fluent Interface
+
 === Value Objects (pass values with a context)
 
 .TODO
@@ -84,7 +86,7 @@ Check if Crystal structs have built in value comparisons or if those need to be 
 
 NOTE: Share the smallest possible data structure - large data structures will be slow to copy.
 
-=== link:async_state_sharing.html[Async State Sharing]
+=== link:channel_callbacks.html[Channel Callbacks]
 
 * Safely share state information when its available
 

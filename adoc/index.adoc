@@ -47,18 +47,18 @@ crystal run src/file_name.cr
 
 * Structs _(& Records)_ are immutable data structures - these are `safe` when used in a concurrent/parallel context.
 
-== Macros
+== Macros _**(not done)**_
 
 * Crystal's answer to Meta-programming
 * Using macros to reduce boiler-plate and build a simple **Actor Model**
 
-== Design Patterns
+== Design Patterns _**(not done)**_
 
-=== Decorator
+=== Decorator _**(not done)**_
 
-=== Fluent Interface
+=== Fluent Interface _**(not done)**_
 
-=== Value Objects (pass values with a context)
+=== Value Objects (pass values with a context) _**(not done)**_
 
 .TODO
 ****
@@ -66,6 +66,8 @@ Check if Crystal structs have built in value comparisons or if those need to be 
 ****
 
 == Concurrency & Parallelism
+
+_(TODO: augment and adapt content using inspiration from: https://blog.golang.org/pipelines)_
 
 === link:concurrency_basics.html[Concurrency Basics]
 
@@ -90,11 +92,11 @@ NOTE: Share the smallest possible data structure - large data structures will be
 
 * Safely share state information when its available
 
-=== Parallelism
+=== Parallelism _**(not done)**_
 
 * Compiling to use multiple CPUs
 
-=== Actor Model
+=== Actor Model _**(not done)**_
 
 * Using macros to build async message sending, callbacks and state sharing.
 
@@ -116,6 +118,10 @@ NOTE: Share the smallest possible data structure - large data structures will be
 * Crystal Lang API Docs - https://crystal-lang.org/api/0.32.1/index.html
 * Crystal Lang Gitter - https://gitter.im/crystal-lang/crystal -- friendly people instrumental in helping me better understand how to implement these ideas in crystal (special mention to: @stnluu_twitter, @watzon, @repomaa, @randiaz95, @straight-shoota & @paulcsmith)
 
+== Webpage & Code Repo
+
+Webpage and associated code can be found at: https://github.com/btihen/crystal_explorations
+
 == Generating these Docs
 
 ```bash
@@ -124,6 +130,7 @@ asciidoctor -D docs adoc/*
 
 == Corrections & Improvements
 
-- please make a https://github.com/btihen/crystal_explorations/issues[Github issue], a pull request or contact me to improve this document.
+- make a https://github.com/btihen/crystal_explorations[pull request] with your suggestion(s)
+- or a https://github.com/btihen/crystal_explorations/issues[Github issue]
 
 Thanks!

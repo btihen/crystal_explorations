@@ -479,7 +479,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 
   private getter name, email, departure_channel
 
-  def initialize(@name : String, @email : String, @departure_channel : Channel(User)) # <b class="conum">(1)</b>
+  # notice 'Nil' as a class/constant not a value in the Definition
+  def initialize(@name : String, @email : String,
+                 @departure_channel : Channel(Nil))  # <b class="conum">(1)</b>
     @message_channel = Channel(String).new(3)
     listen_for_messages
   end
@@ -496,9 +498,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 
         puts "To: #{to_s} -- #{message}"
       end
-      puts "#{to_s} -- CLOSING"
-      # notify main when done
-      departure_channel.send(self)  # <b class="conum">(2)</b>
+      puts "#{to_s} -- CLOSED"
+      # notify when loop ends -- channel is closed
+      # notice 'nil' as the value when sending
+      departure_channel.send(nil)
     end
   end
 end</code></pre>
@@ -507,10 +510,10 @@ end</code></pre>
 <div class="colist arabic">
 <ol>
 <li>
-<p>Inject the external channel into our class and makes it available to the User.</p>
+<p>Inject Main&#8217;s 'channel' into our class to callback on when User&#8217;s message_channel closes.</p>
 </li>
 <li>
-<p><strong>AFTER</strong> the loop (closing the channel ends the loop) - and the code moves on the callback over the <code>departure_channel</code></p>
+<p><strong>AFTER</strong> User&#8217;s message_channel closes - notify Main of closing <em>(main isn&#8217;t tracking users who are closed - just counting that all are closed&#8201;&#8212;&#8201;so send 'nil' is a good choice)</em></p>
 </li>
 </ol>
 </div>
@@ -520,41 +523,41 @@ end</code></pre>
 <div class="listingblock">
 <div class="title">src/channel_callbacks/main.cr</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="linenums"># src/channel_callbacks/main.cr
-require "./user"
+<pre class="prettyprint highlight"><code data-lang="linenums">require "./user"
 
 module Main
-
-  # make callback status channel
-  user_closed = Channel(User).new
+  # make callback channel for users
+  # notice 'Nil' as a class/constant not a value
+  user_closed = Channel(Nil).new
 
   # make a large number of users
   users  = [] of User
 
   100.times do |i|
-    user = User.new(name: "user_#{i}", email: "user_#{i}@example.ch", departure_channel: user_closed)
+    # all users get given the same channel to notify of closure
+    user = User.new(name: "user_#{i}", email: "user_#{i}@example.ch",
+                    departure_channel: user_closed)
     users &lt;&lt; user
   end
 
   # send lots of messages - async (for some reason async needs to be first)
   users.each do |receiver|
-    receiver.message_channel.send("SYNC 0 -- From: #{receiver.to_s} - with channel")
-    spawn receiver.message_channel.send("ASYNC 1 -- From: #{receiver.to_s} - with channel")
+    receiver.message_channel.send("SYNC 0 -- From: #{receiver.to_s}")
+    spawn receiver.message_channel.send("ASYNC 1 -- From: #{receiver.to_s}")
   end
 
   # channels allow chaining too!
-  # users.each do |receiver|
-  #   receiver.message_channel.send("SYNC 2 -- From: #{receiver.to_s} - with channel").send("SYNC 3 -- From: #{receiver.to_s} - with channel")
-  #   spawn receiver.message_channel.send("ASYNC 4 -- From: #{receiver.to_s} - with channel").send("ASYNC 5 -- From: #{receiver.to_s} - with channel").close
-  # end
-
-  # close asynchronously to allow all messages to be delivered and put close at the end of the queue
   users.each do |receiver|
-    spawn receiver.message_channel.close
+    receiver.message_channel.send("SYNC 3 -- From: #{receiver.to_s}")
+    spawn receiver.message_channel.send("ASYNC 4 -- From: #{receiver.to_s}")
+                                  .send("ASYNC 5 -- close is next")
+                                  .close
   end
 
-  # wait for all users to close
+  puts "LISTEN for CLOSED CHANNELS before closing"
+  # listen and wait for all users to close
   (users.size).times { user_closed.receive }
+  puts "ALL users CLOSED - safe to end"
 end</code></pre>
 </div>
 </div>
@@ -575,27 +578,13 @@ end</code></pre>
 <div class="ulist">
 <ul>
 <li>
-<p>all async message arrive in the order they are send</p>
+<p>Channels allow a fluid interface (chaining)!</p>
+</li>
+<li>
+<p>Message arrive in the order they are RECEIVED - <em>Async messages are sent when scheduled (later) - thus Sync messages arrive first</em></p>
 </li>
 </ul>
 </div>
-</div>
-</div>
-<div class="paragraph">
-<p>We can also chain messages to channels change the code to the following and run again.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="crystal"># channels allow chaining too!
-users.each do |receiver|
-  receiver.message_channel.send("SYNC 2 -- From: #{receiver.to_s} - with channel").send("SYNC 3 -- From: #{receiver.to_s} - with channel")
-  spawn receiver.message_channel.send("ASYNC 4 -- From: #{receiver.to_s} - with channel").send("ASYNC 5 -- From: #{receiver.to_s} - with channel").close
-end
-
-# close asynchronously to allow all messages to be delivered and put close at the end of the queue
-# users.each do |receiver|
-#   spawn receiver.message_channel.close
-# end</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -606,7 +595,7 @@ end
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-15 22:15:56 +0100
+Last updated 2020-01-18 11:03:20 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">

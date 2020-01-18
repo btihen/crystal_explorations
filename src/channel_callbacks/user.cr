@@ -5,7 +5,8 @@ class User
 
   private getter name, email, departure_channel
 
-  def initialize(@name : String, @email : String, @departure_channel : Channel(User))
+  # notice 'Nil' as a class/constant not a value in the Definition
+  def initialize(@name : String, @email : String, @departure_channel : Channel(Nil))
     @message_channel = Channel(String).new(3)
     listen_for_messages
   end
@@ -22,9 +23,10 @@ class User
 
         puts "To: #{to_s} -- #{message}"
       end
-      puts "#{to_s} -- CLOSING"
-      # notify main when done
-      departure_channel.send(self)
+      puts "#{to_s} -- CLOSED"
+      # notify when loop ends -- channel is closed
+      # notice 'nil' as the value when sending
+      departure_channel.send(nil)
     end
   end
 end

@@ -53,7 +53,7 @@ class User
       puts "#{to_s} -- CLOSED"
       # notify when loop ends -- channel is closed
       # notice 'nil' as the value when sending
-      departure_channel.send(nil)
+      departure_channel.send(nil)  # <2>
     end
   end
 end

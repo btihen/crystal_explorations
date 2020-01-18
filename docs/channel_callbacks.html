@@ -501,7 +501,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
       puts "#{to_s} -- CLOSED"
       # notify when loop ends -- channel is closed
       # notice 'nil' as the value when sending
-      departure_channel.send(nil)
+      departure_channel.send(nil)  # <b class="conum">(2)</b>
     end
   end
 end</code></pre>
@@ -595,7 +595,7 @@ end</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-18 11:03:20 +0100
+Last updated 2020-01-18 11:46:50 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">

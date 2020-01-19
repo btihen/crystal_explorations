@@ -470,8 +470,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_channels_async_messaging">6.3. Channels <em>(Async Messaging)</em></a></li>
 <li><a href="#_channel_buffers">6.4. Channel Buffers</a></li>
 <li><a href="#_channel_callbacks">6.5. Channel Callbacks</a></li>
-<li><a href="#_parallelism_not_done">6.6. Parallelism <em><strong>(not done)</strong></em></a></li>
-<li><a href="#_actor_model_not_done">6.7. Actor Model <em><strong>(not done)</strong></em></a></li>
+<li><a href="#_crystal_promises">6.6. Crystal Promises</a></li>
+<li><a href="#_parallelism">6.7. Parallelism</a></li>
+<li><a href="#_websockets_not_done">6.8. WebSockets <em><strong>(not done)</strong></em></a></li>
+<li><a href="#_actor_model_not_done">6.9. Actor Model <em><strong>(not done)</strong></em></a></li>
 </ul>
 </li>
 <li><a href="#_to_dos">7. TO-DOs</a></li>
@@ -653,18 +655,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 </ul>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">
-Share the smallest possible data structure - large data structures will be slow to copy.
-</td>
-</tr>
-</table>
-</div>
 </div>
 <div class="sect2">
 <h3 id="_channel_callbacks">6.5. <a href="channel_callbacks.html">Channel Callbacks</a></h3>
@@ -677,17 +667,37 @@ Share the smallest possible data structure - large data structures will be slow 
 </div>
 </div>
 <div class="sect2">
-<h3 id="_parallelism_not_done">6.6. Parallelism <em><strong>(not done)</strong></em></h3>
+<h3 id="_crystal_promises">6.6. Crystal Promises</h3>
 <div class="ulist">
 <ul>
 <li>
-<p>Compiling to use multiple CPUs</p>
+<p>See: <a href="https://github.com/spider-gazelle/promise" class="bare">https://github.com/spider-gazelle/promise</a></p>
 </li>
 </ul>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_actor_model_not_done">6.7. Actor Model <em><strong>(not done)</strong></em></h3>
+<h3 id="_parallelism">6.7. <a href="parallelism.html">Parallelism</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Compiling to use multiple CPUs (add <code>-Dpreview_mt</code>) to the compile command</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_websockets_not_done">6.8. WebSockets <em><strong>(not done)</strong></em></h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://spider-gazelle.net/#/controllers/websockets" class="bare">https://spider-gazelle.net/#/controllers/websockets</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_actor_model_not_done">6.9. Actor Model <em><strong>(not done)</strong></em></h3>
 <div class="ulist">
 <ul>
 <li>
@@ -746,9 +756,21 @@ Share the smallest possible data structure - large data structures will be slow 
 <p>Crystal Lang API Docs - <a href="https://crystal-lang.org/api/0.32.1/index.html" class="bare">https://crystal-lang.org/api/0.32.1/index.html</a></p>
 </li>
 <li>
-<p>Crystal Lang Gitter - <a href="https://gitter.im/crystal-lang/crystal&#8201;&#8212;&#8201;friendly" class="bare">https://gitter.im/crystal-lang/crystal&#8201;&#8212;&#8201;friendly</a> people instrumental in helping me better understand how to implement these ideas in crystal (special mention to: @stnluu_twitter, @watzon, @repomaa, @randiaz95, @straight-shoota &amp; @paulcsmith)</p>
+<p>Crystal Lang Gitter - <a href="https://gitter.im/crystal-lang/crystal" class="bare">https://gitter.im/crystal-lang/crystal</a></p>
 </li>
 </ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<strong>Crystal Lang Gitter</strong> is a great group of people willing to help. (special mention to: @stnluu_twitter, @watzon, @repomaa, @randiaz95, @straight-shoota &amp; @paulcsmith)
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -765,7 +787,7 @@ Share the smallest possible data structure - large data structures will be slow 
 <div class="sectionbody">
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">asciidoctor -D docs adoc/*</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ asciidoctor -D docs adoc/*</code></pre>
 </div>
 </div>
 </div>
@@ -791,7 +813,7 @@ Share the smallest possible data structure - large data structures will be slow 
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-15 22:34:16 +0100
+Last updated 2020-01-19 10:32:00 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">

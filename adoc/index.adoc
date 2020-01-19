@@ -86,15 +86,22 @@ _(TODO: augment and adapt content using inspiration from: https://blog.golang.or
 
 * What to do when messages come faster than collected
 
-NOTE: Share the smallest possible data structure - large data structures will be slow to copy.
-
 === link:channel_callbacks.html[Channel Callbacks]
 
 * Safely share state information when its available
 
-=== Parallelism _**(not done)**_
+=== Crystal Promises 
 
-* Compiling to use multiple CPUs
+* See: https://github.com/spider-gazelle/promise
+
+=== link:parallelism.html[Parallelism]
+
+* Compiling to use multiple CPUs (add `-Dpreview_mt`) to the compile command
+
+=== WebSockets _**(not done)**_
+
+* https://spider-gazelle.net/#/controllers/websockets
+
 
 === Actor Model _**(not done)**_
 
@@ -116,7 +123,9 @@ NOTE: Share the smallest possible data structure - large data structures will be
 * Crystal Git Repo - https://github.com/crystal-lang/crystal/
 * Crystal Lang GitBook - https://crystal-lang.org/reference/guides
 * Crystal Lang API Docs - https://crystal-lang.org/api/0.32.1/index.html
-* Crystal Lang Gitter - https://gitter.im/crystal-lang/crystal -- friendly people instrumental in helping me better understand how to implement these ideas in crystal (special mention to: @stnluu_twitter, @watzon, @repomaa, @randiaz95, @straight-shoota & @paulcsmith)
+* Crystal Lang Gitter - https://gitter.im/crystal-lang/crystal
+
+NOTE: *Crystal Lang Gitter* is a great group of people willing to help. (special mention to: @stnluu_twitter, @watzon, @repomaa, @randiaz95, @straight-shoota & @paulcsmith)
 
 == Webpage & Code Repo
 
@@ -125,7 +134,7 @@ Webpage and associated code can be found at: https://github.com/btihen/crystal_e
 == Generating these Docs
 
 ```bash
-asciidoctor -D docs adoc/*
+$ asciidoctor -D docs adoc/*
 ```
 
 == Corrections & Improvements

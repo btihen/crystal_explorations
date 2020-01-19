@@ -460,7 +460,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect1">
-<h2 id="_parallelism">1. <a href="https://crystal-lang.org/2019/09/06/parallelism-in-crystal.html">Parallelism</a></h2>
+<h2 id="_parallelism">1. Parallelism</h2>
 <div class="sectionbody">
 <div class="admonitionblock note">
 <table>
@@ -469,61 +469,40 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="title">Note</div>
 </td>
 <td class="content">
-Compiling for Parallelism is EXPERIMENTAL
+Compiling for Parallelism is EXPERIMENTAL - see:<br>
+<a href="https://crystal-lang.org/2019/09/06/parallelism-in-crystal.html" class="bare">https://crystal-lang.org/2019/09/06/parallelism-in-crystal.html</a>
 </td>
 </tr>
 </table>
 </div>
-<div class="paragraph">
-<p>To compile and run with parallelism enabled use:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>To compiling for parallelism (multiple CPUs) add: <code>-Dpreview_mt</code> to the compile command as shown bellow:</p>
+</li>
+</ul>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="bash">$ crystal build -Dpreview_mt code.cr -o code
-$ ./code                   # defaul is 4 workers
-$ CRYSTAL_WORKERS=2 ./code # uses two CPUS
-$ CRYSTAL_WORKERS=4 ./code # same as default</code></pre>
+<pre class="prettyprint highlight"><code data-lang="bash">$ crystal build -Dpreview_mt main.cr</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Jason Thomas (@thedracle):</p>
+<p>Run using:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="crystal">The actual server code is as follows:
-
-require "socket"
-require "http/web_socket"
-require "http/server"
-
-VTX_SERVER_ADDR="test.org"
-
-module VTXClientServerCrystal
-  VERSION = "0.1.0"
-  class VTXClientServerCrystal
-    @listen_port : Int32
-    def initialize
-      ENV["LISTEN_PORT"] ||= "7003"
-      @listen_port = ENV["LISTEN_PORT"].to_i
-    end
-    def route_connections
-      ws_handler = HTTP::WebSocketHandler.new {|client|
-        client.on_message {|next_message|
-          puts next_message
-          client.send next_message
-        };
-      };
-      server = HTTP::Server.new([ws_handler]);
-      context = OpenSSL::SSL::Context::Server.new
-      context.certificate_chain = "./cert/server.cert"
-      context.private_key = "./cert/server.key"
-      address = server.bind_tls Socket::IPAddress.new("127.0.0.1", @listen_port), context
-      server.listen
-    end
-  end
-
-  server = VTXClientServerCrystal.new
-  server.route_connections
+<pre class="prettyprint highlight"><code data-lang="bash">$ ./main                    # default is to run with 4 CPUs
+$ CRYSTAL_WORKERS=8 ./main  # this case run will use 8 CPUs</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now if you need to ensure a Fiber is in the same thread you must use:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="crystal">spawn same_thread: true do
+  # ...
 end</code></pre>
 </div>
 </div>
@@ -535,7 +514,7 @@ end</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-12 14:20:09 +0100
+Last updated 2020-01-19 10:35:11 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">

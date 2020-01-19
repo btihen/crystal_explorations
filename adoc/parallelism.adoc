@@ -14,57 +14,28 @@ Version 0.0.1
 
 *link:index.html[Start Page]*
 
-== https://crystal-lang.org/2019/09/06/parallelism-in-crystal.html[Parallelism]
+== Parallelism
 
-NOTE: Compiling for Parallelism is EXPERIMENTAL
+NOTE: Compiling for Parallelism is EXPERIMENTAL - see: +
+https://crystal-lang.org/2019/09/06/parallelism-in-crystal.html
 
 
-To compile and run with parallelism enabled use:
+* To compiling for parallelism (multiple CPUs) add: `-Dpreview_mt` to the compile command as shown bellow: 
+
 ```bash
-$ crystal build -Dpreview_mt code.cr -o code
-$ ./code                   # defaul is 4 workers
-$ CRYSTAL_WORKERS=2 ./code # uses two CPUS
-$ CRYSTAL_WORKERS=4 ./code # same as default
+$ crystal build -Dpreview_mt main.cr
 ```
 
-
-
-Jason Thomas (@thedracle):
+Run using:
+```bash
+$ ./main                    # default is to run with 4 CPUs
+$ CRYSTAL_WORKERS=8 ./main  # this case run will use 8 CPUs
 ```
-The actual server code is as follows:
 
-require "socket"
-require "http/web_socket"
-require "http/server"
-
-VTX_SERVER_ADDR="test.org"
-
-module VTXClientServerCrystal
-  VERSION = "0.1.0"
-  class VTXClientServerCrystal
-    @listen_port : Int32
-    def initialize
-      ENV["LISTEN_PORT"] ||= "7003"
-      @listen_port = ENV["LISTEN_PORT"].to_i
-    end
-    def route_connections
-      ws_handler = HTTP::WebSocketHandler.new {|client|
-        client.on_message {|next_message|
-          puts next_message
-          client.send next_message
-        };
-      };
-      server = HTTP::Server.new([ws_handler]);
-      context = OpenSSL::SSL::Context::Server.new
-      context.certificate_chain = "./cert/server.cert"
-      context.private_key = "./cert/server.key"
-      address = server.bind_tls Socket::IPAddress.new("127.0.0.1", @listen_port), context
-      server.listen
-    end
-  end
-
-  server = VTXClientServerCrystal.new
-  server.route_connections
+Now if you need to ensure a Fiber is in the same thread you must use:
+```crystal
+spawn same_thread: true do
+  # ...
 end
 ```
 

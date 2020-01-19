@@ -1,0 +1,83 @@
+= Crystal Lang Explorations -- Websockets
+:source-highlighter: prettify
+:source-language: crystal
+Bill Tihen (Crystal 0.32.1)
+Version 0.0.1
+:sectnums:
+:toc:
+:toclevels: 4
+:toc-title: Contents
+
+:description: Exploring Crystal's Features
+:keywords: Crystal Language
+:imagesdir: ./images
+
+*link:index.html[Start Page]*
+
+== Websockets 
+
+Making long-lived client-server connections over a TCP.
+
+=== Websocket Server 
+
+```crystal
+# src/web_sockets/server.cr
+require "http/server"
+
+# track the open websockets
+SOCKETS = [] of HTTP::WebSocket
+
+ws_handler = HTTP::WebSocketHandler.new do |socket|
+  puts "Socket opened"
+  SOCKETS << socket
+
+  # A very simple chat room indeed
+  socket.on_message do |message|
+    puts message
+    SOCKETS.each { |socket| socket.send message }
+  end
+
+  # Clean up any references
+  socket.on_close do
+    SOCKETS.delete(socket)
+  end
+
+  # `.run` is called on the WebSocket automatically when this block returns
+end
+
+server = HTTP::Server.new([ws_handler])
+
+address = server.bind_tcp "localhost", 3000
+puts "Listening on ws://#{address}"
+server.listen
+```
+
+=== Websocket Client
+
+```crystal
+# src/web_sockets/client.cr
+require "http/web_socket"
+
+uri    = URI.parse("ws://localhost:3000")
+socket = HTTP::WebSocket.new(uri)  
+socket.send "Howdy1"
+
+socket.on_message do |message|
+  puts message
+end
+
+socket.send "Howdy2"
+
+socket.run
+
+socket.send "Howdy2"
+```
+
+=== Helpful Resources 
+* https://spider-gazelle.net/#/controllers/websockets
+* https://crystal-lang.org/api/0.32.1/HTTP/WebSocket.html
+* https://crystal-lang.org/api/0.32.1/HTTP/WebSocketHandler.html
+* https://medium.com/@muhammadtriwibowo/simple-websocket-using-crystal-13b6f67eba61
+
+
+*link:index.html[Start Page]*

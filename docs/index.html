@@ -448,39 +448,31 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toctitle">Contents</div>
 <ul class="sectlevel1">
 <li><a href="#_installation">1. Installation</a></li>
-<li><a href="#_crystal_cli">2. Crystal CLI</a></li>
-<li><a href="#_structs_records">3. Structs &amp; Records</a>
+<li><a href="#_crystal_cli">2. Crystal CLI</a>
 <ul class="sectlevel2">
-<li><a href="#_structs">3.1. Structs</a></li>
-<li><a href="#_records">3.2. Records</a></li>
+<li><a href="#_structs_records">2.1. Structs &amp; Records</a></li>
+<li><a href="#_structs">2.2. Structs</a></li>
+<li><a href="#_records">2.3. Records</a></li>
 </ul>
 </li>
-<li><a href="#_macros_not_done">4. Macros <em><strong>(not done)</strong></em></a></li>
-<li><a href="#_design_patterns_not_done">5. Design Patterns <em><strong>(not done)</strong></em></a>
+<li><a href="#_websockets">3. WebSockets</a></li>
+<li><a href="#_concurrency_parallelism">4. Concurrency &amp; Parallelism</a>
 <ul class="sectlevel2">
-<li><a href="#_decorator_not_done">5.1. Decorator <em><strong>(not done)</strong></em></a></li>
-<li><a href="#_fluent_interface_not_done">5.2. Fluent Interface <em><strong>(not done)</strong></em></a></li>
-<li><a href="#_value_objects_pass_values_with_a_context_not_done">5.3. Value Objects (pass values with a context) <em><strong>(not done)</strong></em></a></li>
+<li><a href="#_concurrency_basics">4.1. Concurrency Basics</a></li>
+<li><a href="#_concurrent_objects">4.2. Concurrent Objects</a></li>
+<li><a href="#_channels_async_messaging">4.3. Channels <em>(Async Messaging)</em></a></li>
+<li><a href="#_channel_buffers">4.4. Channel Buffers</a></li>
+<li><a href="#_channel_callbacks">4.5. Channel Callbacks</a></li>
+<li><a href="#_crystal_promises">4.6. Crystal Promises</a></li>
+<li><a href="#_parallelism">4.7. Parallelism</a></li>
+<li><a href="#_actor_model_not_done">4.8. Actor Model <em><strong>(not done)</strong></em></a></li>
 </ul>
 </li>
-<li><a href="#_concurrency_parallelism">6. Concurrency &amp; Parallelism</a>
-<ul class="sectlevel2">
-<li><a href="#_concurrency_basics">6.1. Concurrency Basics</a></li>
-<li><a href="#_concurrent_objects">6.2. Concurrent Objects</a></li>
-<li><a href="#_channels_async_messaging">6.3. Channels <em>(Async Messaging)</em></a></li>
-<li><a href="#_channel_buffers">6.4. Channel Buffers</a></li>
-<li><a href="#_channel_callbacks">6.5. Channel Callbacks</a></li>
-<li><a href="#_crystal_promises">6.6. Crystal Promises</a></li>
-<li><a href="#_parallelism">6.7. Parallelism</a></li>
-<li><a href="#_websockets_not_done">6.8. WebSockets <em><strong>(not done)</strong></em></a></li>
-<li><a href="#_actor_model_not_done">6.9. Actor Model <em><strong>(not done)</strong></em></a></li>
-</ul>
-</li>
-<li><a href="#_to_dos">7. TO-DOs</a></li>
-<li><a href="#_resources">8. Resources</a></li>
-<li><a href="#_webpage_code_repo">9. Webpage &amp; Code Repo</a></li>
-<li><a href="#_generating_these_docs">10. Generating these Docs</a></li>
-<li><a href="#_corrections_improvements">11. Corrections &amp; Improvements</a></li>
+<li><a href="#_to_dos">5. TO-DOs</a></li>
+<li><a href="#_resources">6. Resources</a></li>
+<li><a href="#_webpage_code_repo">7. Webpage &amp; Code Repo</a></li>
+<li><a href="#_generating_these_docs">8. Generating these Docs</a></li>
+<li><a href="#_corrections_improvements">9. Corrections &amp; Improvements</a></li>
 </ul>
 </div>
 </div>
@@ -541,13 +533,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <pre class="prettyprint highlight"><code data-lang="crystal">crystal run src/file_name.cr</code></pre>
 </div>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_structs_records">3. Structs &amp; Records</h2>
-<div class="sectionbody">
 <div class="sect2">
-<h3 id="_structs">3.1. <a href="structs.html">Structs</a></h3>
+<h3 id="_structs_records">2.1. Structs &amp; Records</h3>
+
+</div>
+<div class="sect2">
+<h3 id="_structs">2.2. <a href="structs.html">Structs</a></h3>
 <div class="ulist">
 <ul>
 <li>
@@ -557,7 +548,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect2">
-<h3 id="_records">3.2. <a href="records.html">Records</a></h3>
+<h3 id="_records">2.3. <a href="records.html">Records</a></h3>
 <div class="ulist">
 <ul>
 <li>
@@ -569,52 +560,29 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect1">
-<h2 id="_macros_not_done">4. Macros <em><strong>(not done)</strong></em></h2>
+<h2 id="_websockets">3. <a href="websockets.html">WebSockets</a></h2>
 <div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>Crystal&#8217;s answer to Meta-programming</p>
-</li>
-<li>
-<p>Using macros to reduce boiler-plate and build a simple <strong>Actor Model</strong></p>
-</li>
-</ul>
+<div class="paragraph">
+<p>Making long-lived client-server connections over a TCP.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_design_patterns_not_done">5. Design Patterns <em><strong>(not done)</strong></em></h2>
+<h2 id="_concurrency_parallelism">4. Concurrency &amp; Parallelism</h2>
 <div class="sectionbody">
-<div class="sect2">
-<h3 id="_decorator_not_done">5.1. Decorator <em><strong>(not done)</strong></em></h3>
-
+<div class="paragraph">
+<p>An intro into the basics of how things like websockets work</p>
 </div>
-<div class="sect2">
-<h3 id="_fluent_interface_not_done">5.2. Fluent Interface <em><strong>(not done)</strong></em></h3>
-
-</div>
-<div class="sect2">
-<h3 id="_value_objects_pass_values_with_a_context_not_done">5.3. Value Objects (pass values with a context) <em><strong>(not done)</strong></em></h3>
 <div class="sidebarblock">
 <div class="content">
 <div class="title">TODO</div>
 <div class="paragraph">
-<p>Check if Crystal structs have built in value comparisons or if those need to be added to build a proper <strong>Value Object</strong></p>
+<p>Augment and adapt content using inspiration from: <a href="https://blog.golang.org/pipelines" class="bare">https://blog.golang.org/pipelines</a></p>
 </div>
 </div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_concurrency_parallelism">6. Concurrency &amp; Parallelism</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p><em>(TODO: augment and adapt content using inspiration from: <a href="https://blog.golang.org/pipelines" class="bare">https://blog.golang.org/pipelines</a>)</em></p>
 </div>
 <div class="sect2">
-<h3 id="_concurrency_basics">6.1. <a href="concurrency_basics.html">Concurrency Basics</a></h3>
+<h3 id="_concurrency_basics">4.1. <a href="concurrency_basics.html">Concurrency Basics</a></h3>
 <div class="ulist">
 <ul>
 <li>
@@ -624,7 +592,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect2">
-<h3 id="_concurrent_objects">6.2. <a href="concurrent_objects.html">Concurrent Objects</a></h3>
+<h3 id="_concurrent_objects">4.2. <a href="concurrent_objects.html">Concurrent Objects</a></h3>
 <div class="ulist">
 <ul>
 <li>
@@ -634,7 +602,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect2">
-<h3 id="_channels_async_messaging">6.3. <a href="channels_async_messaging.html">Channels <em>(Async Messaging)</em></a></h3>
+<h3 id="_channels_async_messaging">4.3. <a href="channels_async_messaging.html">Channels <em>(Async Messaging)</em></a></h3>
 <div class="ulist">
 <ul>
 <li>
@@ -647,7 +615,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect2">
-<h3 id="_channel_buffers">6.4. <a href="channel_buffers.html">Channel Buffers</a></h3>
+<h3 id="_channel_buffers">4.4. <a href="channel_buffers.html">Channel Buffers</a></h3>
 <div class="ulist">
 <ul>
 <li>
@@ -657,7 +625,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect2">
-<h3 id="_channel_callbacks">6.5. <a href="channel_callbacks.html">Channel Callbacks</a></h3>
+<h3 id="_channel_callbacks">4.5. <a href="channel_callbacks.html">Channel Callbacks</a></h3>
 <div class="ulist">
 <ul>
 <li>
@@ -667,7 +635,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect2">
-<h3 id="_crystal_promises">6.6. Crystal Promises</h3>
+<h3 id="_crystal_promises">4.6. Crystal Promises</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -677,7 +645,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect2">
-<h3 id="_parallelism">6.7. <a href="parallelism.html">Parallelism</a></h3>
+<h3 id="_parallelism">4.7. <a href="parallelism.html">Parallelism</a></h3>
 <div class="ulist">
 <ul>
 <li>
@@ -687,17 +655,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect2">
-<h3 id="_websockets_not_done">6.8. WebSockets <em><strong>(not done)</strong></em></h3>
-<div class="ulist">
-<ul>
-<li>
-<p><a href="https://spider-gazelle.net/#/controllers/websockets" class="bare">https://spider-gazelle.net/#/controllers/websockets</a></p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_actor_model_not_done">6.9. Actor Model <em><strong>(not done)</strong></em></h3>
+<h3 id="_actor_model_not_done">4.8. Actor Model <em><strong>(not done)</strong></em></h3>
 <div class="ulist">
 <ul>
 <li>
@@ -709,7 +667,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect1">
-<h2 id="_to_dos">7. TO-DOs</h2>
+<h2 id="_to_dos">5. TO-DOs</h2>
 <div class="sectionbody">
 <div class="ulist">
 <ul>
@@ -742,7 +700,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect1">
-<h2 id="_resources">8. Resources</h2>
+<h2 id="_resources">6. Resources</h2>
 <div class="sectionbody">
 <div class="ulist">
 <ul>
@@ -775,7 +733,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect1">
-<h2 id="_webpage_code_repo">9. Webpage &amp; Code Repo</h2>
+<h2 id="_webpage_code_repo">7. Webpage &amp; Code Repo</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Webpage and associated code can be found at: <a href="https://github.com/btihen/crystal_explorations" class="bare">https://github.com/btihen/crystal_explorations</a></p>
@@ -783,7 +741,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect1">
-<h2 id="_generating_these_docs">10. Generating these Docs</h2>
+<h2 id="_generating_these_docs">8. Generating these Docs</h2>
 <div class="sectionbody">
 <div class="listingblock">
 <div class="content">
@@ -793,7 +751,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect1">
-<h2 id="_corrections_improvements">11. Corrections &amp; Improvements</h2>
+<h2 id="_corrections_improvements">9. Corrections &amp; Improvements</h2>
 <div class="sectionbody">
 <div class="ulist">
 <ul>
@@ -813,7 +771,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-19 10:32:00 +0100
+Last updated 2020-01-19 11:47:07 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">

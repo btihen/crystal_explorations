@@ -37,7 +37,7 @@ For all other systems see: https://crystal-lang.org/install/
 crystal run src/file_name.cr
 ```
 
-== Structs & Records
+=== Structs & Records
 
 === link:structs.html[Structs]
 
@@ -47,27 +47,19 @@ crystal run src/file_name.cr
 
 * Structs _(& Records)_ are immutable data structures - these are `safe` when used in a concurrent/parallel context.
 
-== Macros _**(not done)**_
 
-* Crystal's answer to Meta-programming
-* Using macros to reduce boiler-plate and build a simple **Actor Model**
+== link:websockets.html[WebSockets]
 
-== Design Patterns _**(not done)**_
-
-=== Decorator _**(not done)**_
-
-=== Fluent Interface _**(not done)**_
-
-=== Value Objects (pass values with a context) _**(not done)**_
-
-.TODO
-****
-Check if Crystal structs have built in value comparisons or if those need to be added to build a proper *Value Object*
-****
+Making long-lived client-server connections over a TCP.
 
 == Concurrency & Parallelism
 
-_(TODO: augment and adapt content using inspiration from: https://blog.golang.org/pipelines)_
+An intro into the basics of how things like websockets work
+
+.TODO
+****
+Augment and adapt content using inspiration from: https://blog.golang.org/pipelines
+****
 
 === link:concurrency_basics.html[Concurrency Basics]
 
@@ -97,10 +89,6 @@ _(TODO: augment and adapt content using inspiration from: https://blog.golang.or
 === link:parallelism.html[Parallelism]
 
 * Compiling to use multiple CPUs (add `-Dpreview_mt`) to the compile command
-
-=== WebSockets _**(not done)**_
-
-* https://spider-gazelle.net/#/controllers/websockets
 
 
 === Actor Model _**(not done)**_

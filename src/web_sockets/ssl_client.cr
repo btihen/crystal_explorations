@@ -1,4 +1,4 @@
-# allow listen in background and accept new inputs too
+# get working
 
 require "http/web_socket"
 
